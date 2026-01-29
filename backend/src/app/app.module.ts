@@ -4,11 +4,13 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from "@nestjs/config"
 import { appConfig } from '../config/app.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import environmentValidation from '../config/environment.validation';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig]
+      load: [appConfig],
+      validationSchema: environmentValidation
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
