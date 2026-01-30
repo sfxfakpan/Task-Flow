@@ -9,6 +9,7 @@ export interface Board {
   members: User[];
   createdAt: string;
   updatedAt: string;
+  taskCount?: number;
 }
 export interface BoardDetail extends Board {
   columns: BoardColumn[];
