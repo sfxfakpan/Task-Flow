@@ -8,9 +8,9 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root'
 })
 export class BoardService {
-  private http = inject(HttpClient);
   
   private apiUrl = `${environment.apiUrl}/boards`;
+  constructor(private http: HttpClient) { }
 
   getBoards(): Observable<Board[]> {
     return this.http.get<Board[]>(this.apiUrl).pipe(
@@ -54,8 +54,7 @@ export class BoardService {
       
       errorMessage = `Server Code: ${error.status}\nMessage: ${error.message}`;
     }
-    
-    console.error(errorMessage);
+
     return throwError(() => new Error(errorMessage));
   }
 }
