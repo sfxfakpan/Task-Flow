@@ -5,8 +5,8 @@ import { Board } from "../../board/entities/board.entity";
 
 @Entity()
 export class User{
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @Column({
         nullable: false,

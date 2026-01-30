@@ -4,7 +4,7 @@ import { User } from "../../user/entities/user.entity";
 
 @Entity()
 export class Board{
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn("uuid")
     id: number;
 
     @CreateDateColumn()

@@ -6,6 +6,7 @@ import { appConfig } from '../config/app.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import environmentValidation from '../config/environment.validation';
 import { UserModule } from '../modules/user/user.module';
+import { BoardModule } from '../modules/board/board.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { UserModule } from '../modules/user/user.module';
         };
       },
     }),
-    UserModule
+    UserModule,
+    BoardModule
   ],
   controllers: [AppController],
   providers: [AppService],
