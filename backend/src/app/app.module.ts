@@ -5,6 +5,9 @@ import { ConfigModule, ConfigService } from "@nestjs/config"
 import { appConfig } from '../config/app.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import environmentValidation from '../config/environment.validation';
+import { UserModule } from '../modules/user/user.module';
+import { BoardModule } from '../modules/board/board.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,10 +28,12 @@ import environmentValidation from '../config/environment.validation';
           password: db.password,
           database: db.name,
           autoLoadEntities: db.autoLoadEntities,
-          synchronize: db.sync,
+          synchronize: false //db.sync,
         };
       },
     }),
+    UserModule,
+    BoardModule
   ],
   controllers: [AppController],
   providers: [AppService],
