@@ -1,5 +1,6 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Exclude } from "class-transformer";
+import { Board } from "../../board/entities/board.entity";
 
 
 @Entity()
@@ -30,4 +31,14 @@ export class User{
     })
     @Exclude()
     password: string;
+
+    
+    @CreateDateColumn()
+    createdAt:Date;
+
+    @UpdateDateColumn()
+    updatedAt:Date;
+
+    @OneToMany(() => Board, (board) => board.owner)
+    boards?: Board[]
 }
