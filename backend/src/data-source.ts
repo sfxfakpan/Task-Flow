@@ -5,8 +5,6 @@ import path from 'path';
 
 dotenv.config({ path: path.resolve('backend/.env') });
 
-console.log('username', process.env.DATABASE_USER)
-
 export default new DataSource({
   type: 'postgres',
   host: process.env.DATABASE_HOST!,
