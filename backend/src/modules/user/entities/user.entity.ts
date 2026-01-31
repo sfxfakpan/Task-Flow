@@ -1,6 +1,7 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Exclude } from "class-transformer";
 import { Board } from "../../board/entities/board.entity";
+import { Task } from "../../task/entities/task.entity";
 
 
 @Entity()
@@ -32,6 +33,11 @@ export class User{
     @Exclude()
     password: string;
 
+    @OneToMany(() => Board, (board) => board.user)
+    boards?: Board[];
+
+    @OneToMany(() => Task, (task) => task.assignee)
+    assignedTasks?: Task[];
     
     @CreateDateColumn()
     createdAt:Date;
@@ -39,6 +45,8 @@ export class User{
     @UpdateDateColumn()
     updatedAt:Date;
 
-    @OneToMany(() => Board, (board) => board.owner)
-    boards?: Board[]
+    @DeleteDateColumn({ type: 'timestamp', nullable: true })
+    deletedAt?: Date;
+
+    
 }
