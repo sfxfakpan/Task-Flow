@@ -9,13 +9,13 @@ export class AuthController {
   constructor(private readonly authService: AuthService){}
   
   @UseGuards(JwtAuthGuard)
-  @Get('/profile')
+  @Get('/me')
   getProfile(@Req() req) {
     return this.authService.getProfile(req.user.sub)
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('/signup')
+  @Post('/register')
   async signup(@Body() createUserDto: RegisterDto) {
     return await this.authService.signUp(createUserDto);
   }
