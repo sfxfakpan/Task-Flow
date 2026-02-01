@@ -1,27 +1,53 @@
 <div
-  class="group h-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col cursor-pointer"
+  class="group h-full bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all relative overflow-visible flex flex-col cursor-pointer"
   (click)="cardClick.emit(board)"
+  (mouseleave)="menuOpen.set(false)"
 >
   <div
-    class="absolute left-0 top-0 bottom-0 w-1.5 bg-primary group-hover:w-2 transition-all"
+    class="absolute left-0 top-0 bottom-0 w-1.5 bg-primary group-hover:w-2 transition-all rounded-l-xl"
   ></div>
 
   <div class="p-6 flex-1">
-    <div class="flex justify-between items-start mb-4">
+    <div class="flex justify-between items-start mb-4 relative">
       <h3
         class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors"
       >
         {{ board.name }}
       </h3>
 
-      <button
-        mat-icon-button
-        [matMenuTriggerFor]="menu"
-        (click)="$event.stopPropagation()"
-        class="!w-8 !h-8 flex items-center justify-center text-slate-400 hover:text-slate-600"
-      >
-        <span class="material-symbols-outlined text-[20px]">more_vert</span>
-      </button>
+      <div class="relative">
+        <button
+          (click)="toggleMenu($event)"
+          class="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        >
+          <span class="material-symbols-outlined text-[20px]">more_vert</span>
+        </button>
+
+        <div
+          *ngIf="menuOpen()"
+          class="absolute right-0 top-8 w-40 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden animation-fade-in"
+        >
+          <button
+            (click)="
+              $event.stopPropagation(); edit.emit(board); menuOpen.set(false)
+            "
+            class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
+          >
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+            Edit
+          </button>
+
+          <button
+            (click)="
+              $event.stopPropagation(); delete.emit(board); menuOpen.set(false)
+            "
+            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+          >
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+            Delete
+          </button>
+        </div>
+      </div>
     </div>
 
     <p class="text-slate-500 dark:text-slate-400 text-sm mt-2 line-clamp-3">
@@ -45,14 +71,3 @@
     </span>
   </div>
 </div>
-
-<mat-menu #menu="matMenu">
-  <button mat-menu-item (click)="edit.emit(board)">
-    <span class="material-symbols-outlined mr-2">edit</span>
-    <span>Edit</span>
-  </button>
-  <button mat-menu-item (click)="delete.emit(board)" class="!text-red-600">
-    <span class="material-symbols-outlined mr-2">delete</span>
-    <span>Delete</span>
-  </button>
-</mat-menu>

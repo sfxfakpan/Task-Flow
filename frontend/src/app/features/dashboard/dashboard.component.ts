@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-// Services & Models
+
 import { BoardService } from '../../core/services/board.service';
 import { Board } from '../../core/models/board.model';
 import { BoardCardComponent } from './components/board-card/board-card.component';
@@ -13,26 +13,24 @@ import { BoardCardComponent } from './components/board-card/board-card.component
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    BoardCardComponent
-  ],
+  imports: [CommonModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, BoardCardComponent],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  private boardService = inject(BoardService);
-  private router = inject(Router);
 
-  // Signals
   boards = signal<Board[]>([]);
-  isLoading = signal<boolean>(true);
+  isLoading = signal<boolean>(false);
+
+  constructor(
+    private boardService: BoardService, private router: Router) { }
 
   ngOnInit() {
-    this.loadBoards();
+
+    this.isLoading.set(true);
+    setTimeout(() => {
+      this.isLoading.set(false);
+    }, 1000);
   }
 
   loadBoards() {
@@ -50,11 +48,27 @@ export class DashboardComponent implements OnInit {
   }
 
   openBoard(board: Board) {
-    this.router.navigate(['/boards', board.id]);
+    console.log('Navigating to board:', board.name);
+    //this.router.navigate(['/boards', board.id]);
   }
 
   createBoard() {
-    console.log('Open Create Dialog');
+    const boardName = window.prompt("Enter board name:");
+
+    if (boardName) {
+      // Mock adding a board to the UI immediately
+      this.boards.update(current => [
+        ...current,
+        {
+          id: "234567890",
+          name: boardName,
+          description: 'New project board',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          taskCount: 0
+        }
+      ]);
+    }
   }
 
   editBoard(board: Board) {

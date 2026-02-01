@@ -28,7 +28,7 @@ export class BoardDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<BoardDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: Board | null // Null = Create, Board = Edit
+    @Inject(MAT_DIALOG_DATA) public data: Board | null
   ) {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
@@ -48,7 +48,7 @@ export class BoardDialogComponent implements OnInit {
 
   onSubmit() {
     if (this.form.valid) {
-      // Return the form value to the Dashboard Component
+
       this.dialogRef.close(this.form.value);
     }
   }
