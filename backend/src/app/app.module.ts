@@ -24,19 +24,24 @@ import { TaskModule } from '../modules/task/task.module';
         const db = config.get('app.database');
         return {
           type: 'postgres',
-          host: db.host,
-          port: db.port,
-          username: db.username,
-          password: db.password,
-          database: db.name,
-          autoLoadEntities: db.autoLoadEntities,
-          synchronize: false //db.sync,
+          // host: db.host,
+          // port: db.port,
+          // username: db.username,
+          // password: db.password,
+          // database: db.name,
+          autoLoadEntities: true, //db.autoLoadEntities,
+          synchronize: true, //db.sync,
+          url: db.url,
+          ssl: {
+            rejectUnauthorized: false,
+          }
+
         };
       },
     }),
     UserModule,
     BoardModule,
-    AuthModule
+    AuthModule,
     TaskModule
   ],
   controllers: [AppController],
