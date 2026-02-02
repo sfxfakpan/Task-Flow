@@ -1,0 +1,80 @@
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { BoardService } from '../../core/services/board.service';
+import { Board } from '../../core/models/board.model';
+import { BoardCardComponent } from './components/board-card/board-card.component';
+import { BoardDialogComponent } from './components/board-dialog/board-dialog.component';
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [CommonModule, BoardDialogComponent, BoardCardComponent],
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.css']
+})
+export class DashboardComponent implements OnInit {
+
+  boards = signal<Board[]>([]);
+  isLoading = signal<boolean>(false);
+  showDialog = signal(false);
+  editingBoard = signal<Board | null>(null);
+
+  constructor(
+    private boardService: BoardService, private router: Router) { }
+
+  ngOnInit() {
+    this.isLoading.set(true);
+    setTimeout(() => {
+      this.isLoading.set(false);
+    }, 1000);
+  }
+
+  // loadBoards() {
+  //   this.isLoading.set(true);
+  //   this.boardService.getBoards().subscribe({
+  //     next: (data) => {
+  //       this.boards.set(data);
+  //       this.isLoading.set(false);
+  //     },
+  //     error: (err) => {
+  //       console.error(err);
+  //       this.isLoading.set(false);
+  //     }
+  //   });
+  // }
+
+
+  openCreateDialog() {
+    this.editingBoard.set(null);
+    this.showDialog.set(true);
+  }
+
+
+  openEditDialog(board: Board) {
+    this.editingBoard.set(board);
+    this.showDialog.set(true);
+  }
+
+
+  handleSave(formData: { name: string; description: string }) {
+    const editingBoard = this.editingBoard();
+    if (editingBoard !== null) {
+      this.boardService.updateBoard(editingBoard.id, formData)
+    } else {
+      this.boardService.createBoard(formData);
+    }
+    this.closeDialog();
+  }
+
+  closeDialog() {
+    this.showDialog.set(false);
+    this.editingBoard.set(null);
+  }
+
+  deleteBoard(board: Board) {
+    this.boardService.deleteBoard(board.id)
+  }
+
+
+}

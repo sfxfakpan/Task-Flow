@@ -8,6 +8,7 @@ import environmentValidation from '../config/environment.validation';
 import { UserModule } from '../modules/user/user.module';
 import { BoardModule } from '../modules/board/board.module';
 import { AuthModule } from '../modules/auth/auth.module';
+import { TaskModule } from '../modules/task/task.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { AuthModule } from '../modules/auth/auth.module';
     UserModule,
     BoardModule,
     AuthModule
+    TaskModule
   ],
   controllers: [AppController],
   providers: [AppService],
