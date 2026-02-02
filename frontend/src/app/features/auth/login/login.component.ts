@@ -35,10 +35,6 @@ export class LoginComponent {
     private router: Router,
   ) {}
 
-  navigateToLandingPage() {
-    this.router.navigate(['/']);
-  }
-
   submit() {
     this.submitted = true;
     this.fieldErrors = {};
