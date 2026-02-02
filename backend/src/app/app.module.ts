@@ -36,7 +36,7 @@ import { TaskModule } from '../modules/task/task.module';
     }),
     UserModule,
     BoardModule,
-    AuthModule
+    AuthModule,
     TaskModule
   ],
   controllers: [AppController],
