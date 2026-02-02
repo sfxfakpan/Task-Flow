@@ -11,17 +11,18 @@ import { BoardDialogComponent } from './components/board-dialog/board-dialog.com
   standalone: true,
   imports: [CommonModule, BoardDialogComponent, BoardCardComponent],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
-
   boards = signal<Board[]>([]);
   isLoading = signal<boolean>(false);
   showDialog = signal(false);
   editingBoard = signal<Board | null>(null);
 
   constructor(
-    private boardService: BoardService, private router: Router) { }
+    private boardService: BoardService,
+    private router: Router,
+  ) {}
 
   ngOnInit() {
     this.isLoading.set(true);
@@ -44,25 +45,32 @@ export class DashboardComponent implements OnInit {
   //   });
   // }
 
-
   openCreateDialog() {
     this.editingBoard.set(null);
     this.showDialog.set(true);
   }
-
 
   openEditDialog(board: Board) {
     this.editingBoard.set(board);
     this.showDialog.set(true);
   }
 
-
   handleSave(formData: { name: string; description: string }) {
     const editingBoard = this.editingBoard();
     if (editingBoard !== null) {
-      this.boardService.updateBoard(editingBoard.id, formData)
+      this.boardService.updateBoard(editingBoard.id, formData);
     } else {
-      this.boardService.createBoard(formData);
+      const newBoard: Board = {
+        id: 'Date.now()',
+        ...formData,
+        createdAt: new Date(),
+        taskCount: 0,
+      };
+
+      // Update local state
+      this.boards.update((current) => [newBoard, ...current]);
+
+      // this.boardService.createBoard(formData);
     }
     this.closeDialog();
   }
@@ -73,8 +81,6 @@ export class DashboardComponent implements OnInit {
   }
 
   deleteBoard(board: Board) {
-    this.boardService.deleteBoard(board.id)
+    this.boardService.deleteBoard(board.id);
   }
-
-
 }

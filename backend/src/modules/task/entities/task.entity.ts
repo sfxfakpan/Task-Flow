@@ -11,7 +11,7 @@ import {
 import { Board } from '../../board/entities/board.entity';
 import { User } from '../../user/entities/user.entity';
 import { TaskStatus } from '../enum/task-status.enum';
-import { TaskPriority } from '../enum/task-priority.enum';
+
 
 
 @Entity('tasks')
