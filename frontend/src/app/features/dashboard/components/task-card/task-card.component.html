@@ -1,0 +1,61 @@
+<div
+  class="bg-white rounded p-3 cursor-pointer transition-all shadow-sm border-l-4 border-l-[#667eea] flex flex-col gap-2 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+  [ngClass]="getPriorityBorderClass()"
+  (click)="onCardClick()"
+>
+  <!-- Priority Left Border is handled by ngClass -->
+
+  <!-- Card Header -->
+  <div class="flex justify-between items-start gap-2">
+    <h3
+      class="m-0 text-sm font-semibold text-gray-800 flex-1 break-words leading-tight"
+    >
+      {{ task.title }}
+    </h3>
+    <span
+      class="text-xs font-semibold px-2 py-1 rounded whitespace-nowrap flex-shrink-0 inline-block"
+      [ngClass]="'priority-' + task.priority.toLowerCase()"
+    >
+      {{ task.priority }}
+    </span>
+  </div>
+
+  <p
+    *ngIf="task.description"
+    class="m-0 text-xs text-gray-600 leading-relaxed line-clamp-2"
+  >
+    {{ truncateDescription(task.description) }}
+  </p>
+
+  <!-- Card Footer -->
+  <div class="flex justify-between items-center mt-1 gap-2">
+    <!-- Due Date with Icon -->
+    <div
+      *ngIf="task.dueDate"
+      class="flex items-center gap-1 text-xs text-gray-500 flex-1 min-w-0"
+    >
+      <svg
+        class="w-3.5 h-3.5 flex-shrink-0"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+      <span class="whitespace-nowrap overflow-hidden text-ellipsis">{{
+        task.dueDate | date: 'MMM d'
+      }}</span>
+    </div>
+
+    <div
+      *ngIf="task.assigneeId"
+      class="w-7 h-7 rounded-full bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white flex items-center justify-center text-xs font-semibold flex-shrink-0 shadow-sm"
+    >
+      {{ getInitials('User') }}
+    </div>
+  </div>
+</div>
