@@ -1,59 +1,61 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { Board } from '../../../../core/models/board.model';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-board-dialog',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './board-dialog.component.html',
-  styleUrl: './board-dialog.component.css'
+  styleUrls: ['./board-dialog.component.css']
 })
 export class BoardDialogComponent implements OnInit {
-  form: FormGroup;
-  isEditMode: boolean = false;
 
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<BoardDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: Board | null
-  ) {
-    this.form = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3)]],
-      description: ['']
+  @Input() boardData: any = null;
+
+
+  @Output() close = new EventEmitter<void>();
+  @Output() save = new EventEmitter<{ name: string; description: string }>();
+
+  boardForm: FormGroup;
+  isEditMode = signal(false);
+  isSubmitting = signal(false);
+
+  constructor(private fb: FormBuilder) {
+
+    this.boardForm = this.fb.group({
+      name: ['', [Validators.required, Validators.maxLength(100)]],
+      description: ['', [Validators.maxLength(500)]]
     });
   }
 
-  ngOnInit(): void {
-    if (this.data) {
-      this.isEditMode = true;
-      this.form.patchValue({
-        name: this.data.name,
-        description: this.data.description
+  ngOnInit() {
+
+    if (this.boardData) {
+      this.isEditMode.set(true);
+      this.boardForm.patchValue({
+        name: this.boardData.name,
+        description: this.boardData.description
       });
     }
   }
 
-  onSubmit() {
-    if (this.form.valid) {
 
-      this.dialogRef.close(this.form.value);
-    }
+  hasError(field: string, error: string) {
+    const control = this.boardForm.get(field);
+    return control?.hasError(error) && control?.touched;
   }
 
-  onCancel() {
-    this.dialogRef.close(null);
+  onSubmit() {
+    if (this.boardForm.valid) {
+      this.isSubmitting.set(true);
+
+      setTimeout(() => {
+        this.save.emit(this.boardForm.value);
+        this.isSubmitting.set(false);
+      }, 500);
+    } else {
+      this.boardForm.markAllAsTouched();
+    }
   }
 }
