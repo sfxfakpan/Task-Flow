@@ -1,0 +1,18 @@
+{
+  "transpileOnly": true,
+  "swc": true,
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2021",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "types": ["node"]
+  }
+}
