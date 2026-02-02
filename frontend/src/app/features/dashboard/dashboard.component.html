@@ -1,0 +1,153 @@
+<div
+  class="flex flex-col min-h-screen bg-background-light dark:bg-background-dark font-display"
+>
+  <header
+    class="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80 backdrop-blur-md"
+  >
+    <div
+      class="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between gap-8"
+    >
+      <div class="flex items-center gap-3 shrink-0">
+        <div
+          class="bg-primary text-white p-1.5 rounded-lg flex items-center justify-center"
+        >
+          <span class="material-symbols-outlined">grid_view</span>
+        </div>
+        <h2
+          class="text-slate-900 dark:text-white text-xl font-bold tracking-tight"
+        >
+          TaskFlow
+        </h2>
+      </div>
+
+      <div class="hidden md:block flex-1 max-w-xl">
+        <div class="relative group">
+          <div
+            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary transition-colors"
+          >
+            <span class="material-symbols-outlined text-[20px]">search</span>
+          </div>
+          <input
+            class="block w-full pl-10 pr-3 py-2 bg-slate-100 dark:bg-slate-800 border-transparent focus:border-primary focus:ring-0 rounded-lg text-sm transition-all"
+            placeholder="Search boards..."
+            type="text"
+          />
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 shrink-0">
+        <button class="p-2 text-slate-500 hover:bg-slate-100 rounded-lg">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-800 mx-1"></div>
+        <div
+          class="h-9 w-9 rounded-full bg-slate-300 border border-slate-200"
+        ></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-[1280px] w-full mx-auto px-6 py-8">
+    <div *ngIf="isLoading()" class="flex h-[60vh] items-center justify-center">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <div
+      *ngIf="!isLoading() && boards().length === 0"
+      class="flex flex-col items-center justify-center py-20 px-4 bg-white/50 dark:bg-gray-800/20 rounded-2xl border border-dashed border-gray-300"
+    >
+      <div class="flex flex-col items-center text-center max-w-[420px]">
+        <div class="relative mb-8 flex justify-center items-center">
+          <div
+            class="absolute inset-0 bg-primary/10 rounded-full blur-3xl opacity-50"
+          ></div>
+          <span class="material-symbols-outlined text-9xl text-slate-300"
+            >assignment_add</span
+          >
+        </div>
+
+        <h3
+          class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight"
+        >
+          Start your first project
+        </h3>
+        <p class="text-gray-500 text-base leading-relaxed mt-3 mb-8">
+          No boards yet. Create your first project board to start tracking tasks
+          and managing your workflow.
+        </p>
+
+        <button
+          (click)="createBoard()"
+          class="flex items-center justify-center gap-2 min-w-[200px] h-12 px-8 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-base shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5"
+        >
+          <span class="material-symbols-outlined">add_circle</span>
+          <span>Create Board</span>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading() && boards().length > 0">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8"
+      >
+        <div>
+          <h1
+            class="text-3xl font-black text-slate-900 dark:text-white tracking-tight"
+          >
+            My Boards
+          </h1>
+          <p class="text-slate-500 mt-1">
+            Manage your team projects and visual workflows.
+          </p>
+        </div>
+        <button
+          (click)="createBoard()"
+          class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg font-bold transition-all shadow-md shadow-primary/20 shrink-0"
+        >
+          <span class="material-symbols-outlined text-[20px]">add</span>
+          <span>New Board</span>
+        </button>
+      </div>
+
+      <div
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      >
+        <app-board-card
+          *ngFor="let board of boards()"
+          [board]="board"
+          (cardClick)="openBoard(board)"
+          (edit)="editBoard(board)"
+          (delete)="deleteBoard(board)"
+        ></app-board-card>
+
+        <div
+          (click)="createBoard()"
+          class="group border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl hover:border-primary/50 hover:bg-white dark:hover:bg-slate-900 transition-all flex flex-col items-center justify-center p-8 cursor-pointer min-h-[280px]"
+        >
+          <div
+            class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-4"
+          >
+            <span class="material-symbols-outlined text-[32px]">add</span>
+          </div>
+          <p class="text-slate-900 font-bold">New Board</p>
+          <p class="text-slate-500 text-xs text-center mt-2">
+            Start a project from scratch
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div
+    class="md:hidden sticky bottom-0 w-full bg-white border-t border-slate-200 flex justify-around py-3 z-40"
+  >
+    <button class="flex flex-col items-center gap-1 text-primary">
+      <span class="material-symbols-outlined">dashboard</span>
+      <span class="text-[10px] font-bold">Boards</span>
+    </button>
+    <button class="flex flex-col items-center gap-1 text-slate-400">
+      <span class="material-symbols-outlined">settings</span>
+      <span class="text-[10px] font-medium">Settings</span>
+    </button>
+  </div>
+</div>
