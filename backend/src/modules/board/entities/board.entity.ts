@@ -1,18 +1,50 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { User } from "../../user/entities/user.entity";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
+import { User } from '../../user/entities/user.entity';
+import { Task } from '../../task/entities/task.entity';
 
 
-@Entity()
-export class Board{
-    @PrimaryGeneratedColumn("uuid")
-    id: number;
+@Entity('boards')
+export class Board {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-    @CreateDateColumn()
-    createdAt:Date;
+  @Column({ type: 'varchar', length: 200 })
+  title: string;
 
-    @UpdateDateColumn()
-    updatedAt:Date;
+  @Column({ type: 'text', nullable: true })
+  description?: string;
 
-    @ManyToOne(()=> User, (user) => user.boards)
-    owner: User;
+  @Column({ type: 'uuid' })
+  userId: string;
+
+  @ManyToOne(() => User, (user) => user.boards, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @OneToMany(() => Task, (task) => task.board, {
+    cascade: true,
+  })
+  tasks?: Task[];
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
+
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt?: Date;
 }
