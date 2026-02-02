@@ -70,7 +70,10 @@ export class RegisterComponent {
       })
       .subscribe({
         next: () => this.router.navigate(['/login']),
-        error: (err) => console.log(err.error.message),
+        error: (err) => {
+          this.getErrorMessage =
+            err?.error?.message || 'Something went wrong. Please try again.';
+        },
       });
   }
 }
