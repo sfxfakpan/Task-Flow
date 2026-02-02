@@ -1,5 +1,24 @@
 {
-  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "target": "es2021",
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "strictPropertyInitialization": false,
+    "types": ["node"]
+  },
   "files": [],
   "include": [],
   "references": [
@@ -7,25 +26,20 @@
       "path": "./tsconfig.app.json"
     }
   ],
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "strictPropertyInitialization": false,
-    "module": "commonjs",
-    "target": "es2021",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
-  },
   "ts-node": {
+    "transpileOnly": true,
     "compilerOptions": {
       "module": "commonjs",
+      "target": "es2021",
       "experimentalDecorators": true,
       "emitDecoratorMetadata": true,
-      "strictPropertyInitialization": false
+      "strictPropertyInitialization": false,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "resolveJsonModule": true,
+      "moduleResolution": "node",
+      "types": ["node"]
     }
   }
 }
