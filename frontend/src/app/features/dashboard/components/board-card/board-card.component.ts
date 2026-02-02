@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Board } from 'frontend/src/app/core/models/board.model';
+import { Board } from '../../../../core/models/board.model';
 
 @Component({
   selector: 'app-board-card',
