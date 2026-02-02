@@ -2,7 +2,9 @@ import { registerAs } from '@nestjs/config';
 
 export const appConfig = registerAs('app', () => ({
   environment: {
-    port: process.env.PORT
+    port: process.env.PORT,
+    jwtSecret: process.env.JWT_SECRET,
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN
   },
   database: {
     host: process.env.DATABASE_HOST,
