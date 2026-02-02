@@ -10,20 +10,9 @@ import {
 } from 'typeorm';
 import { Board } from '../../board/entities/board.entity';
 import { User } from '../../user/entities/user.entity';
+import { TaskStatus } from '../enum/task-status.enum';
 
 
-export enum TaskPriority {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  URGENT = 'URGENT',
-}
-
-export enum TaskStatus {
-  TODO = 'TODO',
-  IN_PROGRESS = 'IN_PROGRESS',
-  DONE = 'DONE',
-}
 
 @Entity('tasks')
 export class Task {
