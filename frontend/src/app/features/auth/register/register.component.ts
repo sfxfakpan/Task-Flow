@@ -19,33 +19,24 @@ import { CommonModule } from '@angular/common';
 })
 export class RegisterComponent {
   activeTab: 'login' | 'register' = 'register';
+  registerForm;
 
-  private readonly formBuilder = inject(FormBuilder);
-  private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
-
-  setActiveTab(tab: 'login' | 'register') {
-    this.activeTab = tab;
-
-    if (tab === 'login') {
-      this.router.navigate(['/login']);
-    }
-
-    if (tab === 'register') {
-      this.router.navigate(['/register']);
-    }
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private formBuilder: FormBuilder,
+  ) {
+    this.registerForm = this.formBuilder.group(
+      {
+        firstName: ['', [Validators.required, Validators.minLength(2)]],
+        lastName: ['', [Validators.required, Validators.minLength(2)]],
+        email: ['', [Validators.required, Validators.email]],
+        password: ['', [Validators.required, Validators.minLength(8)]],
+        confirmPassword: ['', [Validators.required]],
+      },
+      { validators: this.passwordMatchValidator },
+    );
   }
-
-  registerForm = this.formBuilder.group(
-    {
-      firstName: ['', [Validators.required, Validators.minLength(2)]],
-      lastName: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', [Validators.required]],
-    },
-    { validators: this.passwordMatchValidator },
-  );
 
   passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
     const password = group.get('password')?.value;
