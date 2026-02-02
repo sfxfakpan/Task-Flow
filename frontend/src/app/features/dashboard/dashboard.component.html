@@ -116,9 +116,23 @@
           *ngFor="let board of boards()"
           [board]="board"
           (edit)="openEditDialog($event)"
-          (delete)="deleteBoard($event)"
+          (delete)="initiateDelete($event)"
         >
         </app-board-card>
+        <app-confirm-dialog
+          *ngIf="boardToDelete()"
+          title="Delete Board?"
+          [message]="
+            'Are you sure you want to delete \'' +
+            boardToDelete()?.name +
+            '\'? All tasks inside will be permanently removed.'
+          "
+          confirmText="Delete Board"
+          type="danger"
+          (confirm)="confirmDelete()"
+          (cancel)="cancelDelete()"
+        >
+        </app-confirm-dialog>
 
         <div
           (click)="openCreateDialog()"

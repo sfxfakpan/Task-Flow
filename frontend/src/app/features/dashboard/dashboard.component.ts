@@ -5,11 +5,12 @@ import { BoardService } from '../../core/services/board.service';
 import { Board } from '../../core/models/board.model';
 import { BoardCardComponent } from './components/board-card/board-card.component';
 import { BoardDialogComponent } from './components/board-dialog/board-dialog.component';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, BoardDialogComponent, BoardCardComponent],
+  imports: [CommonModule, BoardDialogComponent, BoardCardComponent, ConfirmDialogComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -19,6 +20,22 @@ export class DashboardComponent implements OnInit {
   isLoading = signal<boolean>(false);
   showDialog = signal(false);
   editingBoard = signal<Board | null>(null);
+  boardToDelete = signal<Board | null>(null);
+
+  initiateDelete(board: Board) {
+    this.boardToDelete.set(board);
+  }
+
+  confirmDelete() {
+    const board = this.boardToDelete();
+    if (board) {
+      this.boards.update(current => current.filter(b => b.id !== board.id));
+      this.boardToDelete.set(null);
+    }
+  }
+  cancelDelete() {
+    this.boardToDelete.set(null);
+  }
 
   constructor(
     private boardService: BoardService, private router: Router) { }
@@ -62,7 +79,15 @@ export class DashboardComponent implements OnInit {
     if (editingBoard !== null) {
       this.boardService.updateBoard(editingBoard.id, formData)
     } else {
-      this.boardService.createBoard(formData);
+      const newBoard: Board = {
+        id: "Date.now()",
+        ...formData,
+        createdAt: new Date(),
+        taskCount: 0
+      };
+      this.boards.update(current => [newBoard, ...current]);
+
+      // this.boardService.createBoard(formData);
     }
     this.closeDialog();
   }
@@ -75,6 +100,4 @@ export class DashboardComponent implements OnInit {
   deleteBoard(board: Board) {
     this.boardService.deleteBoard(board.id)
   }
-
-
 }

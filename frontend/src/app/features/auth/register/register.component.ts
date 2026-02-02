@@ -44,6 +44,18 @@ export class RegisterComponent {
     return password === confirmPassword ? null : { passwordMismatch: true };
   }
 
+  setActiveTab(tab: 'login' | 'register') {
+    this.activeTab = tab;
+
+    if (tab === 'login') {
+      this.router.navigate(['/login']);
+    }
+
+    if (tab === 'register') {
+      this.router.navigate(['/register']);
+    }
+  }
+
   getErrorMessage(fieldName: string): string {
     const control = this.registerForm.get(fieldName);
     if (!control || !control.errors || !control.touched) return '';
