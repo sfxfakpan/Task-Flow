@@ -6,7 +6,8 @@
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d backend/src/data-source.ts",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d backend/src/data-source.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d backend/src/data-source.ts",
-    "dev:backend": "pnpm migration:run && pnpm nx serve backend"
+    "dev:backend": "pnpm migration:run && pnpm nx serve backend",
+    "dev:frontend": "pnpm nx serve frontend"
   },
   "private": true,
   "devDependencies": {
@@ -39,6 +40,7 @@
     "@types/node": "20.19.9",
     "@typescript-eslint/utils": "^8.40.0",
     "angular-eslint": "^21.0.1",
+    "autoprefixer": "^10.4.24",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",
     "jest": "^30.0.2",
@@ -46,7 +48,9 @@
     "jest-preset-angular": "~16.0.0",
     "jest-util": "^30.0.2",
     "nx": "22.4.2",
+    "postcss": "^8.5.6",
     "prettier": "~3.6.2",
+    "tailwindcss": "3.4.17",
     "ts-jest": "^29.4.0",
     "ts-node": "10.9.1",
     "tsconfig-paths": "^4.2.0",
@@ -71,7 +75,6 @@
     "@nestjs/platform-express": "^11.0.0",
     "@nestjs/swagger": "^11.2.5",
     "@nestjs/typeorm": "^11.0.0",
-    "@tailwindcss/postcss": "^4.1.18",
     "axios": "^1.6.0",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
@@ -79,7 +82,6 @@
     "dotenv": "^17.2.3",
     "joi": "^18.0.2",
     "pg": "^8.17.2",
-    "postcss": "^8.5.6",
     "reflect-metadata": "^0.1.13",
     "rxjs": "~7.8.0",
     "tailwindcss": "^4.1.18",
