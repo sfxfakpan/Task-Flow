@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "migration:generate": "typeorm-ts-node-commonjs migration:generate -d backend/src/data-source.ts",
-    "migration:run": "typeorm-ts-node-commonjs migration:run -d backend/src/data-source.ts",
-    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d backend/src/data-source.ts",
+    "migration:generate": "TS_NODE_TRANSPILE_ONLY=true TS_NODE_PROJECT=./backend/tsconfig.json node -r ts-node/register -r reflect-metadata ./node_modules/typeorm/cli.js migration:generate -d backend/src/data-source.ts",
+    "migration:run": "TS_NODE_TRANSPILE_ONLY=true TS_NODE_PROJECT=./backend/tsconfig.json node -r ts-node/register -r reflect-metadata ./node_modules/typeorm/cli.js migration:run -d backend/src/data-source.ts",
+    "migration:revert": "TS_NODE_TRANSPILE_ONLY=true TS_NODE_PROJECT=./backend/tsconfig.json node -r ts-node/register -r reflect-metadata ./node_modules/typeorm/cli.js migration:revert -d backend/src/data-source.ts",
     "dev:backend": "pnpm migration:run && pnpm nx serve backend"
   },
   "private": true,
