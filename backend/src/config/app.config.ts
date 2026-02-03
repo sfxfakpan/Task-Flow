@@ -1,4 +1,5 @@
 import { registerAs } from '@nestjs/config';
+import { url } from 'inspector';
 
 export const appConfig = registerAs('app', () => ({
   environment: {
@@ -13,7 +14,8 @@ export const appConfig = registerAs('app', () => ({
     password: process.env.DATABASE_PASSWORD,
     name: process.env.DATABASE_NAME,
     autoLoadEntities: process.env.DATABASE_AUTOLOAD_ENTITIES,
-    sync: process.env.DATABASE_SYNC
+    sync: process.env.DATABASE_SYNC,
+    url: process.env.DATABASE_URL
   },
   
 }));
