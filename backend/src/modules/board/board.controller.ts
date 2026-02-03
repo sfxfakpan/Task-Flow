@@ -16,6 +16,7 @@ import { UpdateBoardDto } from './dtos/update-board.dto';
 import { Board } from './entities/board.entity';
 import { BoardsService } from './providers/board.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OwnershipGuard } from '../auth/guards/ownership.guard';
 
 
 @ApiTags('Boards')
@@ -34,6 +35,7 @@ export class BoardsController {
   }
 
   @Get(':id')
+  @UseGuards(OwnershipGuard)
   @ApiOperation({ summary: 'Get a specific board by ID' })
   @ApiResponse({ status: 200, description: 'Board retrieved successfully', type: Board })
   @ApiResponse({ status: 404, description: 'Board not found' })
@@ -56,6 +58,7 @@ export class BoardsController {
   }
 
   @Patch(':id')
+  @UseGuards(OwnershipGuard)
   @ApiOperation({ summary: 'Update a board' })
   @ApiResponse({ status: 200, description: 'Board updated successfully', type: Board })
   @ApiResponse({ status: 404, description: 'Board not found' })
@@ -70,6 +73,7 @@ export class BoardsController {
   }
 
   @Delete(':id')
+  @UseGuards(OwnershipGuard)
   @ApiOperation({ summary: 'Soft delete a board' })
   @ApiResponse({ status: 200, description: 'Board deleted successfully' })
   @ApiResponse({ status: 404, description: 'Board not found' })
