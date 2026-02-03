@@ -6,11 +6,12 @@ import { Board } from '../../core/models/board.model';
 import { BoardCardComponent } from './components/board-card/board-card.component';
 import { BoardDialogComponent } from './components/board-dialog/board-dialog.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { NavbarComponent } from './components/nav-bar/nav-bar.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, BoardDialogComponent, BoardCardComponent, ConfirmDialogComponent],
+  imports: [CommonModule, BoardDialogComponent, BoardCardComponent, ConfirmDialogComponent, NavbarComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
