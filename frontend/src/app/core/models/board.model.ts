@@ -7,8 +7,8 @@ export interface Board {
   description?: string;
   owner?: User;
   members?: User[];
-  createdAt: string;
-  updatedAt?: string;
+  createdAt: Date;
+  updatedAt?: Date;
   taskCount?: number;
 }
 export interface BoardDetail extends Board {
