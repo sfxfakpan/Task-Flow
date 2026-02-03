@@ -11,6 +11,7 @@ import {
 import { Board } from '../../board/entities/board.entity';
 import { User } from '../../user/entities/user.entity';
 import { TaskStatus } from '../enum/task-status.enum';
+import { TaskPriority } from '../enum/task-priority.enum';
 
 
 
@@ -32,6 +33,16 @@ export class Task {
     default: TaskStatus.TODO,
   })
   status: TaskStatus;
+
+  @Column({ type: 'int', default: 0 })
+  position: number;
+
+  @Column({
+    type: 'enum',
+    enum: TaskPriority,
+    default: TaskPriority.MEDIUM,
+  })
+  priority: TaskPriority;
 
   @Column({ type: 'timestamp', nullable: true })
   dueDate?: Date;
@@ -55,9 +66,6 @@ export class Task {
   })
   @JoinColumn({ name: 'assigneeId' })
   assignee?: User;
-
-  @Column({ type: 'int', default: 0 })
-  order: number;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

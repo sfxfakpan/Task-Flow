@@ -1,0 +1,81 @@
+<div
+  class="h-screen bg-gradient-to-br from-[#667eea] to-[#764ba2] overflow-hidden flex flex-col"
+>
+  <div
+    *ngIf="isLoading"
+    class="flex flex-col justify-center items-center h-full gap-4"
+  >
+    <div
+      class="w-[50px] h-[50px] border-4 border-white/30 border-t-white rounded-full animate-spin"
+    ></div>
+    <p class="text-white text-base m-0">Loading board...</p>
+  </div>
+
+  <div
+    *ngIf="error"
+    class="flex justify-center items-center h-full bg-red-600/80 text-white"
+  >
+    <p class="text-xl m-0">{{ error }}</p>
+  </div>
+
+  <div *ngIf="!isLoading && !error && board" class="flex flex-col h-full p-8">
+    <div class="mb-8 text-white">
+      <div class="bg-white/10 p-6 rounded-lg backdrop-blur-lg">
+        <h1 class="m-0 text-4xl font-semibold">{{ board.name }}</h1>
+        <p *ngIf="board.description" class="mt-2 mb-0 text-base opacity-90">
+          {{ board.description }}
+        </p>
+      </div>
+    </div>
+
+    <div class="flex gap-6 flex-1 overflow-x-auto overflow-y-hidden pb-4">
+      <div
+        *ngFor="let status of statuses"
+        class="flex-shrink-0 w-[350px] bg-white/95 rounded-lg flex flex-col shadow-lg overflow-hidden"
+      >
+        <div
+          class="px-5 py-5 bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white flex justify-between items-center border-b border-white/20"
+        >
+          <h2 class="m-0 text-lg font-semibold">{{ statusLabels[status] }}</h2>
+          <span
+            class="inline-flex items-center justify-center w-7 h-7 bg-white/30 rounded-full text-sm font-semibold"
+            >{{ getTaskCountForStatus(status) }}</span
+          >
+        </div>
+
+        <div class="flex flex-col flex-1 p-4 overflow-hidden">
+          <!-- Tasks List -->
+          <div class="flex-1 overflow-y-auto mb-4 flex flex-col gap-3">
+            <app-task-card
+              *ngFor="let task of getTasksForStatus(status)"
+              [task]="task"
+              (taskClick)="onTaskClick($event)"
+            ></app-task-card>
+
+            <div
+              *ngIf="getTaskCountForStatus(status) === 0"
+              class="flex justify-center items-center flex-1 text-gray-400 text-center p-4 text-sm min-h-[100px]"
+            >
+              <p class="m-0">No tasks yet</p>
+            </div>
+          </div>
+
+          <button
+            class="w-full py-3 bg-gray-100 border-2 border-dashed border-gray-300 rounded text-gray-600 font-semibold text-sm cursor-pointer transition-all hover:bg-gray-200 hover:border-[#667eea] hover:text-[#667eea] active:scale-98"
+            (click)="onAddTask(status)"
+            type="button"
+          >
+            + Add Task
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-task-dialog
+    *ngIf="showTaskDialog()"
+    [defaultStatus]="selectedStatusForNewTask()"
+    (close)="onCloseTaskDialog()"
+    (save)="onSaveTask($event)"
+  ></app-task-dialog>
+</div>
