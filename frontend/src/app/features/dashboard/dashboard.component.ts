@@ -12,10 +12,9 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
   standalone: true,
   imports: [CommonModule, BoardDialogComponent, BoardCardComponent, ConfirmDialogComponent],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
-
   boards = signal<Board[]>([]);
   isLoading = signal<boolean>(false);
   showDialog = signal(false);
@@ -38,7 +37,9 @@ export class DashboardComponent implements OnInit {
   }
 
   constructor(
-    private boardService: BoardService, private router: Router) { }
+    private boardService: BoardService,
+    private router: Router,
+  ) {}
 
   ngOnInit() {
     this.isLoading.set(true);
@@ -61,23 +62,20 @@ export class DashboardComponent implements OnInit {
   //   });
   // }
 
-
   openCreateDialog() {
     this.editingBoard.set(null);
     this.showDialog.set(true);
   }
-
 
   openEditDialog(board: Board) {
     this.editingBoard.set(board);
     this.showDialog.set(true);
   }
 
-
   handleSave(formData: { name: string; description: string }) {
     const editingBoard = this.editingBoard();
     if (editingBoard !== null) {
-      this.boardService.updateBoard(editingBoard.id, formData)
+      this.boardService.updateBoard(editingBoard.id, formData);
     } else {
       const newBoard: Board = {
         id: "Date.now()",
@@ -98,6 +96,6 @@ export class DashboardComponent implements OnInit {
   }
 
   deleteBoard(board: Board) {
-    this.boardService.deleteBoard(board.id)
+    this.boardService.deleteBoard(board.id);
   }
 }
