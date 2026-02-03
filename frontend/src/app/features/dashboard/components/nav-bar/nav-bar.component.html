@@ -21,12 +21,12 @@
           class="flex items-center gap-3 p-1.5 pl-3 hover:bg-white/10 rounded-full"
         >
           <span class="text-sm font-medium hidden lg:block">
-            {{ user.name }}
+            {{ user.firstName }}
           </span>
 
              <div
             class="size-8 rounded-full bg-cover bg-center ring-2 ring-white/30"
-            [ngStyle]="{ 'background-image': user.avatarUrl ? 'url(' + user.avatarUrl + ')' : 'url(assets/default-avatar.svg)' }"
+            [ngStyle]="{ 'background-image': user.avatarUrl ? 'url(' + user.avatarUrl + ')' : 'url(assets/avatar.png)' }"
           ></div>
 
           <span class="material-symbols-outlined text-sm hidden sm:block">
@@ -41,7 +41,7 @@
         >
           <div class="p-4 border-b">
             <p class="text-sm font-bold text-gray-900">
-              {{ user.name }}
+              {{ user.firstName }}
             </p>
             <p class="text-xs text-gray-500 mt-1">
               {{ user.email }}
