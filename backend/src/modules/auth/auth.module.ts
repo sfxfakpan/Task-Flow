@@ -8,6 +8,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { BcryptProvider } from './providers/bcrypt.provider';
 import { UserModule } from '../user/user.module';
+import { User } from '../user/entities/user.entity';
 
 @Module({
     imports: [
