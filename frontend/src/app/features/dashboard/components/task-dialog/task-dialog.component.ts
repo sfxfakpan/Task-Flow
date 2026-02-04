@@ -28,9 +28,13 @@ import {
   styleUrls: ['./task-dialog.component.css'],
 })
 export class TaskDialogComponent implements OnInit {
+
   @Input() task: Task | null = null;
+  @Input() taskToEdit: Task | null = null;
+
   @Input() boardId: string = '';
   @Input() defaultStatus: TaskStatus = TaskStatus.TODO;
+
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<Partial<Task>>();
   @Output() delete = new EventEmitter<string>();
@@ -41,14 +45,15 @@ export class TaskDialogComponent implements OnInit {
   isEditMode = signal(false);
   deleteConfirm = signal(false);
 
-  statuses = Object.values(TaskStatus);
-  priorities = Object.values(TaskPriority);
 
   TaskPriority = TaskPriority;
   TaskStatus = TaskStatus;
 
+  statuses = Object.values(TaskStatus);
+  priorities = Object.values(TaskPriority);
+
   statusLabels: Record<TaskStatus, string> = {
-    [TaskStatus.TODO]: 'TODO',
+    [TaskStatus.TODO]: 'To Do',
     [TaskStatus.IN_PROGRESS]: 'In Progress',
     [TaskStatus.DONE]: 'Done',
   };
@@ -79,16 +84,23 @@ export class TaskDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (this.task) {
+
+    const activeTask = this.taskToEdit || this.task;
+
+    if (activeTask) {
+
       this.isEditMode.set(true);
       this.taskForm.patchValue({
-        title: this.task.title,
-        description: this.task.description || '',
-        status: this.task.status,
-        priority: this.task.priority,
-        dueDate: this.task.dueDate ? this.task.dueDate.split('T')[0] : '',
+        title: activeTask.title,
+        description: activeTask.description || '',
+        status: activeTask.status,
+        priority: activeTask.priority,
+
+        dueDate: activeTask.dueDate ? new Date(activeTask.dueDate).toISOString().split('T')[0] : '',
       });
     } else {
+
+      this.isEditMode.set(false);
       this.taskForm.patchValue({
         status: this.defaultStatus,
         priority: TaskPriority.MEDIUM,
@@ -98,9 +110,7 @@ export class TaskDialogComponent implements OnInit {
 
   onSubmit(): void {
     if (this.taskForm.invalid) {
-      Object.keys(this.taskForm.controls).forEach((key) => {
-        this.taskForm.get(key)?.markAsTouched();
-      });
+      this.taskForm.markAllAsTouched();
       return;
     }
 
@@ -118,6 +128,7 @@ export class TaskDialogComponent implements OnInit {
       boardId: this.boardId,
     };
 
+
     this.save.emit(taskData);
   }
 
@@ -126,17 +137,26 @@ export class TaskDialogComponent implements OnInit {
     this.close.emit();
   }
 
+
+
   onDeleteClick(): void {
     this.deleteConfirm.set(true);
   }
 
+  onDeleteCancel(): void {
+    this.deleteConfirm.set(false);
+  }
+
   onDeleteConfirm(): void {
-    if (!this.task?.id) return;
+    const activeTask = this.taskToEdit || this.task;
+    if (!activeTask?.id) return;
 
     this.isDeleting.set(true);
-    this.taskService.deleteTask(this.task.id).subscribe({
+
+
+    this.taskService.deleteTask(activeTask.id, this.boardId).subscribe({
       next: () => {
-        this.delete.emit(this.task!.id);
+        this.delete.emit(activeTask.id);
         this.isDeleting.set(false);
         this.deleteConfirm.set(false);
         this.onClose();
@@ -144,30 +164,23 @@ export class TaskDialogComponent implements OnInit {
       error: (err) => {
         console.error('Error deleting task:', err);
         this.isDeleting.set(false);
+
       },
     });
   }
 
-  onDeleteCancel(): void {
-    this.deleteConfirm.set(false);
-  }
+
 
   get titleError(): string {
-    const titleControl = this.taskForm.get('title');
-    if (titleControl?.hasError('required')) {
-      return 'Task title is required';
-    }
-    if (titleControl?.hasError('maxlength')) {
-      return 'Task title must be less than 200 characters';
-    }
+    const control = this.taskForm.get('title');
+    if (control?.hasError('required')) return 'Task title is required';
+    if (control?.hasError('maxlength')) return 'Title too long (max 200)';
     return '';
   }
 
   get descriptionError(): string {
-    const descControl = this.taskForm.get('description');
-    if (descControl?.hasError('maxlength')) {
-      return 'Description must be less than 1000 characters';
-    }
+    const control = this.taskForm.get('description');
+    if (control?.hasError('maxlength')) return 'Description too long (max 1000)';
     return '';
   }
 
@@ -176,24 +189,11 @@ export class TaskDialogComponent implements OnInit {
   }
 
   getCharacterLimit(fieldName: string): number {
-    const limits: Record<string, number> = {
-      title: 200,
-      description: 1000,
-    };
-    return limits[fieldName] || 0;
-  }
-
-  getPriorityColor(priority: TaskPriority): string {
-    const colors: Record<TaskPriority, string> = {
-      [TaskPriority.LOW]: '#10b981',
-      [TaskPriority.MEDIUM]: '#f59e0b',
-      [TaskPriority.HIGH]: '#ef4444',
-    };
-    return colors[priority];
+    return fieldName === 'title' ? 200 : 1000;
   }
 
   getPriorityIcon(): string {
     const priority = this.taskForm.get('priority')?.value as TaskPriority;
-    return this.priorityIcons[priority] || '→';
+    return this.priorityIcons[priority] || 'arrow_forward';
   }
 }

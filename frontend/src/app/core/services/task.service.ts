@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
 export class TaskService {
   private readonly apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getTasks(boardId: string): Observable<Task[]> {
     return this.http
@@ -17,9 +17,9 @@ export class TaskService {
       .pipe(catchError(this.handleError));
   }
 
-  getTask(taskId: string): Observable<Task> {
+  getTask(taskId: string, boardId: string): Observable<Task> {
     return this.http
-      .get<Task>(`${this.apiUrl}/tasks/${taskId}`)
+      .get<Task>(`${this.apiUrl}/boards/${boardId}/tasks/${taskId}`)
       .pipe(catchError(this.handleError));
   }
 
@@ -29,15 +29,15 @@ export class TaskService {
       .pipe(catchError(this.handleError));
   }
 
-  updateTask(taskId: string, data: Partial<Task>): Observable<Task> {
+  updateTask(taskId: string, data: Partial<Task>, boardId: string): Observable<Task> {
     return this.http
-      .put<Task>(`${this.apiUrl}/tasks/${taskId}`, data)
+      .patch<Task>(`${this.apiUrl}/boards/${boardId}/tasks/${taskId}`, data)
       .pipe(catchError(this.handleError));
   }
 
-  deleteTask(taskId: string): Observable<void> {
+  deleteTask(taskId: string, boardId: string): Observable<void> {
     return this.http
-      .delete<void>(`${this.apiUrl}/tasks/${taskId}`)
+      .delete<void>(`${this.apiUrl}/boards/${boardId}/tasks/${taskId}`)
       .pipe(catchError(this.handleError));
   }
 
@@ -45,9 +45,10 @@ export class TaskService {
     taskId: string,
     status: TaskStatus,
     position: number,
+    boardId: string
   ): Observable<Task> {
     return this.http
-      .patch<Task>(`${this.apiUrl}/tasks/${taskId}/position`, {
+      .patch<Task>(`${this.apiUrl}/boards/${boardId}/tasks/${taskId}/position`, {
         status,
         position,
       })

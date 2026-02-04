@@ -72,6 +72,7 @@
           [board]="board"
           (edit)="openEditDialog($event)"
           (delete)="initiateDelete($event)"
+          (cardClick)="openBoardDetail($event)"
         >
         </app-board-card>
         <app-confirm-dialog

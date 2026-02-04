@@ -10,6 +10,7 @@ export interface Board {
   createdAt: Date;
   updatedAt?: Date;
   taskCount?: number;
+  tasks?: Task[];
 }
 export interface BoardDetail extends Board {
   columns: BoardColumn[];

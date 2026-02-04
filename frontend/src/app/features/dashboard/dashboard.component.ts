@@ -74,6 +74,10 @@ export class DashboardComponent implements OnInit {
     this.showDialog.set(true);
   }
 
+  openBoardDetail(board: Board) {
+    this.router.navigate(['/board-detail', board.id]);
+  }
+
   handleSave(formData: { title: string; description: string }) {
     const editingBoard = this.editingBoard();
     if (editingBoard !== null) {

@@ -1,73 +1,138 @@
-<div
-  class="h-screen bg-gradient-to-br from-[#667eea] to-[#764ba2] overflow-hidden flex flex-col"
->
+<div class="h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans">
   <div
-    *ngIf="isLoading"
+    *ngIf="isLoading()"
     class="flex flex-col justify-center items-center h-full gap-4"
   >
     <div
-      class="w-[50px] h-[50px] border-4 border-white/30 border-t-white rounded-full animate-spin"
+      class="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"
     ></div>
-    <p class="text-white text-base m-0">Loading board...</p>
+    <p class="text-slate-500 dark:text-slate-400">Loading board...</p>
   </div>
 
   <div
-    *ngIf="error"
-    class="flex justify-center items-center h-full bg-red-600/80 text-white"
+    *ngIf="!isLoading() && board"
+    class="flex flex-col h-full p-6 overflow-hidden"
   >
-    <p class="text-xl m-0">{{ error }}</p>
-  </div>
+    <div class="mb-6 shrink-0 flex items-start gap-4">
+      <a
+        routerLink="/dashboard"
+        class="mt-1 p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
+      >
+        <span class="material-symbols-outlined">arrow_back</span>
+      </a>
 
-  <div *ngIf="!isLoading && !error && board" class="flex flex-col h-full p-8">
-    <div class="mb-8 text-white">
-      <div class="bg-white/10 p-6 rounded-lg backdrop-blur-lg">
-        <h1 class="m-0 text-4xl font-semibold">{{ board.name }}</h1>
-        <p *ngIf="board.description" class="mt-2 mb-0 text-base opacity-90">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">
+          {{ board.title }}
+        </h1>
+        <p
+          *ngIf="board.description"
+          class="text-slate-500 dark:text-slate-400 mt-1"
+        >
           {{ board.description }}
         </p>
       </div>
     </div>
 
-    <div class="flex gap-6 flex-1 overflow-x-auto overflow-y-hidden pb-4">
+    <div
+      cdkDropListGroup
+      class="flex flex-1 gap-4 overflow-x-auto pb-2 min-w-0"
+    >
       <div
         *ngFor="let status of statuses"
-        class="flex-shrink-0 w-[350px] bg-white/95 rounded-lg flex flex-col shadow-lg overflow-hidden"
+        class="flex-1 min-w-[300px] flex flex-col bg-slate-100 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800"
       >
         <div
-          class="px-5 py-5 bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white flex justify-between items-center border-b border-white/20"
+          class="p-4 flex justify-between items-center border-b border-slate-200 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-900/50 rounded-t-xl"
         >
-          <h2 class="m-0 text-lg font-semibold">{{ statusLabels[status] }}</h2>
-          <span
-            class="inline-flex items-center justify-center w-7 h-7 bg-white/30 rounded-full text-sm font-semibold"
-            >{{ getTaskCountForStatus(status) }}</span
+          <h2
+            class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2"
           >
+            <span
+              class="w-2.5 h-2.5 rounded-full"
+              [class.bg-blue-500]="status === 'TODO'"
+              [class.bg-orange-500]="status === 'IN_PROGRESS'"
+              [class.bg-green-500]="status === 'DONE'"
+            >
+            </span>
+            {{ statusLabels[status] }}
+          </h2>
+          <span
+            class="px-2 py-0.5 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded text-xs font-bold"
+          >
+            {{ getTasksForStatus(status).length }}
+          </span>
         </div>
 
-        <div class="flex flex-col flex-1 p-4 overflow-hidden">
-          <!-- Tasks List -->
-          <div class="flex-1 overflow-y-auto mb-4 flex flex-col gap-3">
-            <app-task-card
-              *ngFor="let task of getTasksForStatus(status)"
-              [task]="task"
-              (taskClick)="onTaskClick($event)"
-            ></app-task-card>
+        <div
+          cdkDropList
+          [id]="status"
+          [cdkDropListData]="getTasksForStatus(status)"
+          (cdkDropListDropped)="drop($event)"
+          class="flex flex-col flex-1 p-3 gap-3 overflow-y-auto min-h-[150px]"
+        >
+          <div
+            *ngFor="let task of getTasksForStatus(status)"
+            cdkDrag
+            [cdkDragData]="task"
+            class="group relative bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md hover:border-blue-400 dark:hover:border-blue-500 transition-all cursor-grab active:cursor-grabbing"
+          >
+            <div class="flex justify-between items-start mb-2">
+              <span
+                class="text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wider"
+                [ngClass]="{
+                  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400':
+                    task.priority === 'HIGH',
+                  'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400':
+                    task.priority === 'MEDIUM',
+                  'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300':
+                    task.priority === 'LOW',
+                }"
+              >
+                {{ task.priority }}
+              </span>
+
+              <div
+                class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1"
+              >
+                <button
+                  (click)="openEditTask(task)"
+                  class="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-400 hover:text-blue-500"
+                >
+                  <span class="material-symbols-outlined text-lg">edit</span>
+                </button>
+                <button
+                  (click)="deleteTask(task)"
+                  class="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-400 hover:text-red-500"
+                >
+                  <span class="material-symbols-outlined text-lg">delete</span>
+                </button>
+              </div>
+            </div>
+
+            <h3 class="font-medium text-slate-900 dark:text-white mb-1">
+              {{ task.title }}
+            </h3>
 
             <div
-              *ngIf="getTaskCountForStatus(status) === 0"
-              class="flex justify-center items-center flex-1 text-gray-400 text-center p-4 text-sm min-h-[100px]"
+              class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-3"
             >
-              <p class="m-0">No tasks yet</p>
+              <span class="material-symbols-outlined text-sm"
+                >calendar_today</span
+              >
+              <span>{{ task.dueDate | date: 'MMM d' }}</span>
             </div>
-          </div>
 
-          <button
-            class="w-full py-3 bg-gray-100 border-2 border-dashed border-gray-300 rounded text-gray-600 font-semibold text-sm cursor-pointer transition-all hover:bg-gray-200 hover:border-[#667eea] hover:text-[#667eea] active:scale-98"
-            (click)="onAddTask(status)"
-            type="button"
-          >
-            + Add Task
-          </button>
+            <div *cdkDragPlaceholder class="custom-placeholder"></div>
+          </div>
         </div>
+
+        <button
+          (click)="onAddTask(status)"
+          class="m-3 p-2 rounded border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition-all text-sm font-medium"
+        >
+          + Add Task
+        </button>
       </div>
     </div>
   </div>
@@ -75,6 +140,7 @@
   <app-task-dialog
     *ngIf="showTaskDialog()"
     [defaultStatus]="selectedStatusForNewTask()"
+    [taskToEdit]="editingTask()"
     (close)="onCloseTaskDialog()"
     (save)="onSaveTask($event)"
   ></app-task-dialog>
