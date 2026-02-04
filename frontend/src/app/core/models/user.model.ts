@@ -21,7 +21,6 @@ export interface RegisterData {
 
 export interface AuthResponse {
   user: User;
-  // backend returns `access_token`; keep `token` for backwards compatibility
   access_token?: string;
   token?: string;
   refreshToken?: string;
