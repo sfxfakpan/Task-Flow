@@ -26,7 +26,7 @@ export class BoardDialogComponent implements OnInit {
   @Input() boardData: any = null;
 
   @Output() close = new EventEmitter<void>();
-  @Output() save = new EventEmitter<{ name: string; description: string }>();
+  @Output() save = new EventEmitter<{ title: string; description: string }>();
 
   boardForm: FormGroup;
   isEditMode = signal(false);

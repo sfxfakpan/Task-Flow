@@ -40,28 +40,29 @@ export class DashboardComponent implements OnInit {
   constructor(
     private boardService: BoardService,
     private router: Router,
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.isLoading.set(true);
+    this.loadBoards();
     setTimeout(() => {
       this.isLoading.set(false);
     }, 1000);
   }
 
-  // loadBoards() {
-  //   this.isLoading.set(true);
-  //   this.boardService.getBoards().subscribe({
-  //     next: (data) => {
-  //       this.boards.set(data);
-  //       this.isLoading.set(false);
-  //     },
-  //     error: (err) => {
-  //       console.error(err);
-  //       this.isLoading.set(false);
-  //     }
-  //   });
-  // }
+  loadBoards() {
+    this.isLoading.set(true);
+    this.boardService.getBoards().subscribe({
+      next: (data) => {
+        this.boards.set(data);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error(err);
+        this.isLoading.set(false);
+      }
+    });
+  }
 
   openCreateDialog() {
     this.editingBoard.set(null);
@@ -73,7 +74,7 @@ export class DashboardComponent implements OnInit {
     this.showDialog.set(true);
   }
 
-  handleSave(formData: { name: string; description: string }) {
+  handleSave(formData: { title: string; description: string }) {
     const editingBoard = this.editingBoard();
     if (editingBoard !== null) {
       this.boardService.updateBoard(editingBoard.id, formData);
