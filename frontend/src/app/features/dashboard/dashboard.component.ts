@@ -29,8 +29,16 @@ export class DashboardComponent implements OnInit {
   confirmDelete() {
     const board = this.boardToDelete();
     if (board) {
-      this.boards.update(current => current.filter(b => b.id !== board.id));
-      this.boardToDelete.set(null);
+      this.boardService.deleteBoard(board.id).subscribe({
+        next: () => {
+          this.boards.update(current => current.filter(b => b.id !== board.id));
+          this.boardToDelete.set(null);
+        },
+        error: (err) => {
+          console.error('Failed to delete board', err);
+          this.boardToDelete.set(null);
+        }
+      });
     }
   }
   cancelDelete() {
@@ -43,25 +51,22 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.isLoading.set(true);
-    setTimeout(() => {
-      this.isLoading.set(false);
-    }, 1000);
+    this.loadBoards();
   }
 
-  // loadBoards() {
-  //   this.isLoading.set(true);
-  //   this.boardService.getBoards().subscribe({
-  //     next: (data) => {
-  //       this.boards.set(data);
-  //       this.isLoading.set(false);
-  //     },
-  //     error: (err) => {
-  //       console.error(err);
-  //       this.isLoading.set(false);
-  //     }
-  //   });
-  // }
+  loadBoards() {
+    this.isLoading.set(true);
+    this.boardService.getBoards().subscribe({
+      next: (data) => {
+        this.boards.set(data);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load boards', err);
+        this.isLoading.set(false);
+      }
+    });
+  }
 
   openCreateDialog() {
     this.editingBoard.set(null);
@@ -76,17 +81,19 @@ export class DashboardComponent implements OnInit {
   handleSave(formData: { name: string; description: string }) {
     const editingBoard = this.editingBoard();
     if (editingBoard !== null) {
-      this.boardService.updateBoard(editingBoard.id, formData);
+      this.boardService.updateBoard(editingBoard.id, formData).subscribe({
+        next: (updated) => {
+          this.boards.update(current => current.map(b => b.id === updated.id ? updated : b));
+        },
+        error: (err) => console.error('Failed to update board', err)
+      });
     } else {
-      const newBoard: Board = {
-        id: "Date.now()",
-        ...formData,
-        createdAt: new Date(),
-        taskCount: 0
-      };
-      this.boards.update(current => [newBoard, ...current]);
-
-      // this.boardService.createBoard(formData);
+      this.boardService.createBoard(formData).subscribe({
+        next: (created) => {
+          this.boards.update(current => [created, ...current]);
+        },
+        error: (err) => console.error('Failed to create board', err)
+      });
     }
     this.closeDialog();
   }
