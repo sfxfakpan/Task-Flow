@@ -2,15 +2,16 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOptionsWhere } from 'typeorm';
+import { DataSource, Repository, FindOptionsWhere } from 'typeorm';
 import { Board } from '../board/entities/board.entity';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { UpdateTaskDto } from './dtos/update-task.dto';
 import { Task } from './entities/task.entity';
 import { TaskStatus } from './enum/task-status.enum';
-
+import { DatabaseError, DatabaseErrorCode } from '../../common/types/database-error.types';
 
 @Injectable()
 export class TasksService {
@@ -19,20 +20,31 @@ export class TasksService {
     private readonly taskRepository: Repository<Task>,
     @InjectRepository(Board)
     private readonly boardRepository: Repository<Board>,
+    private readonly dataSource: DataSource, // Required for transactions
   ) {}
 
   /**
    * Get all tasks for a specific board, ordered by status and position
    */
   async findAllByBoardId(boardId: string): Promise<Task[]> {
-    return this.taskRepository.find({
-      where: { boardId } as FindOptionsWhere<Task>,
-      relations: ['assignee'],
-      order: {
-        status: 'ASC',
-        position: 'ASC',
-      },
-    });
+    try {
+      return await this.taskRepository.find({
+        where: { boardId } as FindOptionsWhere<Task>,
+        relations: ['assignee'],
+        order: {
+          status: 'ASC',
+          position: 'ASC',
+        },
+      });
+    } catch (error) {
+      const dbError = error as DatabaseError;
+      if (dbError.code === DatabaseErrorCode.INVALID_INPUT_VALUE) {
+        throw new InternalServerErrorException(
+          'Database contains invalid task status values. Valid values are: TODO, IN_PROGRESS, DONE',
+        );
+      }
+      throw error;
+    }
   }
 
   /**
@@ -71,7 +83,6 @@ export class TasksService {
    */
   async create(boardId: string, createTaskDto: CreateTaskDto): Promise<Task> {
     try {
-      // Verify board exists
       const board = await this.boardRepository.findOne({
         where: { id: boardId },
         withDeleted: false,
@@ -81,7 +92,6 @@ export class TasksService {
         throw new NotFoundException('Board not found');
       }
 
-      // Calculate position for new task
       const position = await this.calculateNextPosition(boardId, createTaskDto.status);
 
       const task = this.taskRepository.create({
@@ -92,7 +102,8 @@ export class TasksService {
 
       return await this.taskRepository.save(task);
     } catch (error) {
-      if (error.code === '23503') {
+      const dbError = error as DatabaseError;
+      if (dbError.code === DatabaseErrorCode.FOREIGN_KEY_VIOLATION) {
         throw new BadRequestException('Invalid boardId or assigneeId');
       }
       throw error;
@@ -105,7 +116,6 @@ export class TasksService {
   async update(id: string, updateTaskDto: UpdateTaskDto): Promise<Task> {
     const task = await this.findOne(id);
 
-    // If status changed, recalculate position
     if (updateTaskDto.status && updateTaskDto.status !== task.status) {
       updateTaskDto.position = await this.calculateNextPosition(
         task.boardId,
@@ -118,50 +128,70 @@ export class TasksService {
   }
 
   /**
-   * Update task position (for drag-drop)
+   * Update task position (for drag-drop) - WITH TRANSACTION & POSITION CLAMPING
    */
   async updatePosition(
     id: string,
     newPosition: number,
     newStatus?: TaskStatus,
   ): Promise<Task> {
-    const task = await this.findOne(id);
+    try {
+      return await this.dataSource.transaction(async (manager) => {
+        const task = await this.findOne(id);
 
-    // Get all tasks in the target status column
-    const tasksInColumn = await this.taskRepository.find({
-      where: {
-        boardId: task.boardId,
-        status: newStatus || task.status,
-      } as FindOptionsWhere<Task>,
-      withDeleted: false,
-      order: { position: 'ASC' },
-    });
+        // Get all tasks in the target status column
+        const tasksInColumn = await manager.find(Task, {
+          where: {
+            boardId: task.boardId,
+            status: newStatus || task.status,
+          } as FindOptionsWhere<Task>,
+          withDeleted: false,
+          order: { position: 'ASC' },
+        });
 
-    // Remove current task from list
-    const filteredTasks = tasksInColumn.filter(t => t.id !== task.id);
+        // Remove current task from list
+        const filteredTasks = tasksInColumn.filter(t => t.id !== task.id);
 
-    // Insert task at new position
-    filteredTasks.splice(newPosition, 0, task);
+        // Clamp position to valid range [0, filteredTasks.length]
+        const clampedPosition = Math.max(0, Math.min(newPosition, filteredTasks.length));
 
-    // Update positions for all tasks
-    for (let i = 0; i < filteredTasks.length; i++) {
-      filteredTasks[i].position = i;
-      if (newStatus) {
-        filteredTasks[i].status = newStatus;
+        // Insert task at new position
+        filteredTasks.splice(clampedPosition, 0, task);
+
+        // Update positions for all tasks
+        for (let i = 0; i < filteredTasks.length; i++) {
+          filteredTasks[i].position = i;
+          if (newStatus) {
+            filteredTasks[i].status = newStatus;
+          }
+        }
+
+        // Save all tasks in transaction
+        await manager.save(filteredTasks);
+
+        return task;
+      });
+    } catch (error) {
+      const dbError = error as DatabaseError;
+      if (dbError.code === DatabaseErrorCode.INVALID_INPUT_VALUE) {
+        throw new InternalServerErrorException(
+          'Database contains invalid task status values. Valid values are: TODO, IN_PROGRESS, DONE. Please check your database for corrupted records.',
+        );
       }
+      throw error;
     }
-
-    // Save all tasks in a transaction
-    await this.taskRepository.save(filteredTasks);
-
-    return task;
   }
 
   /**
    * Soft delete a task
    */
-  async remove(id: string): Promise<void> {
+  async remove(id: string): Promise<{ success: boolean; message: string; taskId: string }> {
     const task = await this.findOne(id);
     await this.taskRepository.softDelete(id);
+    return {
+      success: true,
+      message: 'Task deleted successfully',
+      taskId: id,
+    };
   }
 }

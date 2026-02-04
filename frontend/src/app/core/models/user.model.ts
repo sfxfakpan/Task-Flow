@@ -1,6 +1,6 @@
 export interface User {
   id: string;
-  name: string;
+  firstName: string;
   email: string;
   avatarUrl?: string;
   createdAt: string;
@@ -21,6 +21,7 @@ export interface RegisterData {
 
 export interface AuthResponse {
   user: User;
-  token: string;
+  access_token?: string;
+  token?: string;
   refreshToken?: string;
 }

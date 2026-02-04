@@ -134,7 +134,7 @@ export class TaskDialogComponent implements OnInit {
     if (!this.task?.id) return;
 
     this.isDeleting.set(true);
-    this.taskService.deleteTask(this.task.id).subscribe({
+    this.taskService.deleteTask(this.task.id, this.boardId).subscribe({
       next: () => {
         this.delete.emit(this.task!.id);
         this.isDeleting.set(false);

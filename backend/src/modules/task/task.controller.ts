@@ -9,14 +9,17 @@ import {
   UseGuards,
   Req,
   ForbiddenException,
+  HttpCode,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateTaskDto } from './dtos/create-task.dto';
 import { UpdateTaskDto } from './dtos/update-task.dto';
+import { DeleteTaskResponseDto } from './dtos/delete-task-response.dto';
 import { Task } from './entities/task.entity';
 import { TasksService } from './task.service';
 import { BoardsService } from '../board/providers/board.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { TaskStatus } from './enum/task-status.enum';
 
 @ApiTags('Tasks')
 @Controller('boards/:boardId/tasks')
@@ -114,41 +117,48 @@ export class TasksController {
   /**
    * Update task position (for drag-drop)
    */
-  @Patch(':taskId/position')
-  @ApiOperation({ summary: 'Update task position (for drag-drop reordering)' })
-  @ApiResponse({ status: 200, description: 'Position updated successfully', type: Task })
-  @ApiResponse({ status: 404, description: 'Task or board not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - not board owner' })
-  @ApiResponse({ status: 400, description: 'Bad request - invalid position' })
-  async updatePosition(
-    @Param('boardId') boardId: string,
-    @Param('taskId') taskId: string,
-    @Body() body: { position: number; status?: string },
-    @Req() request,
-  ): Promise<Task> {
-    await this.verifyBoardOwnership(boardId, request.user.id);
-    const task = await this.tasksService.findOne(taskId);
+  // ... existing imports ...
 
-    if (task.boardId !== boardId) {
-      throw new ForbiddenException('Task does not belong to this board');
-    }
+@Patch(':taskId/position')
+@ApiOperation({ summary: 'Update task position (for drag-drop reordering)' })
+@ApiResponse({ status: 200, description: 'Position updated successfully', type: Task })
+@ApiResponse({ status: 404, description: 'Task or board not found' })
+@ApiResponse({ status: 403, description: 'Forbidden - not board owner' })
+@ApiResponse({ status: 400, description: 'Bad request - invalid position' })
+async updatePosition(
+  @Param('boardId') boardId: string,
+  @Param('taskId') taskId: string,
+  @Body() body: { position: number; status?: TaskStatus }, 
+  @Req() request,
+): Promise<Task> {
+  await this.verifyBoardOwnership(boardId, request.user.id);
+  const task = await this.tasksService.findOne(taskId);
 
-    return this.tasksService.updatePosition(taskId, body.position, body.status as any);
+  if (task.boardId !== boardId) {
+    throw new ForbiddenException('Task does not belong to this board');
   }
+
+  return this.tasksService.updatePosition(
+    taskId, 
+    body.position, 
+    body.status
+  );
+}
 
   /**
    * Soft delete a task
    */
   @Delete(':taskId')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Soft delete a task' })
-  @ApiResponse({ status: 200, description: 'Task deleted successfully' })
+  @ApiResponse({ status: 200, description: 'Task deleted successfully', type: DeleteTaskResponseDto })
   @ApiResponse({ status: 404, description: 'Task or board not found' })
   @ApiResponse({ status: 403, description: 'Forbidden - not board owner' })
   async remove(
     @Param('boardId') boardId: string,
     @Param('taskId') taskId: string,
     @Req() request,
-  ): Promise<void> {
+  ): Promise<DeleteTaskResponseDto> {
     await this.verifyBoardOwnership(boardId, request.user.id);
     const task = await this.tasksService.findOne(taskId);
 
@@ -156,7 +166,7 @@ export class TasksController {
       throw new ForbiddenException('Task does not belong to this board');
     }
 
-    await this.tasksService.remove(taskId);
+    return await this.tasksService.remove(taskId);
   }
 
   /**

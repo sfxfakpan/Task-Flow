@@ -9,35 +9,40 @@ import { environment } from '../../../environments/environment';
 })
 export class BoardService {
   
-  private apiUrl = `${environment.apiUrl}/boards`;
+  private apiUrl = environment.apiUrl;
+  private endpoints = environment.endpoints.boards;
+  
   constructor(private http: HttpClient) { }
 
   getBoards(): Observable<Board[]> {
-    return this.http.get<Board[]>(this.apiUrl).pipe(
+    return this.http.get<Board[]>(`${this.apiUrl}${this.endpoints.list}`).pipe(
       catchError(this.handleError)
     );
   }
 
   getBoard(id: string): Observable<BoardDetail> {
-    return this.http.get<BoardDetail>(`${this.apiUrl}/${id}`).pipe(
+    const url = `${this.apiUrl}${this.endpoints.get.replace(':id', id)}`;
+    return this.http.get<BoardDetail>(url).pipe(
       catchError(this.handleError)
     );
   }
 
   createBoard(data: CreateBoardDto): Observable<Board> {
-    return this.http.post<Board>(this.apiUrl, data).pipe(
+    return this.http.post<Board>(`${this.apiUrl}${this.endpoints.create}`, data).pipe(
       catchError(this.handleError)
     );
   }
 
   updateBoard(id: string, data: UpdateBoardDto): Observable<Board> {
-    return this.http.patch<Board>(`${this.apiUrl}/${id}`, data).pipe(
+    const url = `${this.apiUrl}${this.endpoints.update.replace(':id', id)}`;
+    return this.http.patch<Board>(url, data).pipe(
       catchError(this.handleError)
     );
   }
 
   deleteBoard(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+    const url = `${this.apiUrl}${this.endpoints.delete.replace(':id', id)}`;
+    return this.http.delete<void>(url).pipe(
       catchError(this.handleError)
     );
   }

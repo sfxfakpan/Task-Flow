@@ -29,13 +29,13 @@ export class AuthService {
 
   login(credentials: LoginData): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>(`${this.apiUrl}/api/auth/login`, credentials)
+      .post<AuthResponse>(`${this.apiUrl}${environment.endpoints.auth.login}`, credentials)
       .pipe(tap((res) => this.handleAuthResponse(res)));
   }
 
   register(userData: RegisterData): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>(`${this.apiUrl}/api/auth/register`, userData)
+      .post<AuthResponse>(`${this.apiUrl}${environment.endpoints.auth.register}`, userData)
       .pipe(tap((res) => this.handleAuthResponse(res)));
   }
 
@@ -57,12 +57,15 @@ export class AuthService {
 
   getCurrentUser(): Observable<User> {
     return this.http
-      .get<User>(`${this.apiUrl}/api/auth/me`)
+      .get<User>(`${this.apiUrl}${environment.endpoints.auth.me}`)
       .pipe(tap((user) => this.setUser(user)));
   }
 
   private handleAuthResponse(response: AuthResponse): void {
-    localStorage.setItem('token', response.token);
+    const token = response.access_token ?? response.token;
+    if (token) {
+      localStorage.setItem('token', token);
+    }
     this.setUser(response.user);
   }
 
