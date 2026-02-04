@@ -23,6 +23,7 @@ export class BoardsService {
     return this.boardRepository.find({
       where: { userId: String(userId) } as FindOptionsWhere<Board>,
       order: { createdAt: 'DESC' },
+      relations: ['tasks'],
     });
   }
 
