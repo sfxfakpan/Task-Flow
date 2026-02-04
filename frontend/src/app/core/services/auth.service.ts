@@ -62,7 +62,10 @@ export class AuthService {
   }
 
   private handleAuthResponse(response: AuthResponse): void {
-    localStorage.setItem('token', response.token);
+    const token = response.access_token ?? response.token;
+    if (token) {
+      localStorage.setItem('token', token);
+    }
     this.setUser(response.user);
   }
 
