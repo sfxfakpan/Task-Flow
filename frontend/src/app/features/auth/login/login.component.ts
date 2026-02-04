@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -10,13 +10,14 @@ import { CommonModule } from '@angular/common';
   imports: [FormsModule, CommonModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
   activeTab: 'login' | 'register' = 'login';
   email = '';
   password = '';
-  submitted = false;
-  fieldErrors: { email?: string; password?: string; general?: string } = {};
+  submitted = signal(false);
+  fieldErrors = signal<{ email?: string; password?: string; general?: string }>({});
 
   setActiveTab(tab: 'login' | 'register') {
     this.activeTab = tab;
@@ -36,19 +37,21 @@ export class LoginComponent {
   ) {}
 
   submit() {
-    this.submitted = true;
-    this.fieldErrors = {};
+    this.submitted.set(true);
+    this.fieldErrors.set({});
+
     this.auth.login({ email: this.email, password: this.password }).subscribe({
       next: () => this.router.navigate(['/dashboard']),
       error: (err) => {
-        this.submitted = false;
+        this.submitted.set(false);
         const payload = err?.error ?? null;
-        if (payload?.field) {
-          this.fieldErrors = payload.message ?? payload.error ?? 'Invalid';
+
+        if (payload?.statusCode === 401 || payload?.message === 'Invalid credentials') {
+          this.fieldErrors.set({ general: payload?.message || 'Invalid credentials' });
         } else if (payload?.message) {
-          this.fieldErrors.general = payload.message;
+          this.fieldErrors.set({ general: payload.message });
         } else {
-          this.fieldErrors.general = 'Login failed.';
+          this.fieldErrors.set({ general: 'Login failed. Please try again.' });
         }
       },
     });
