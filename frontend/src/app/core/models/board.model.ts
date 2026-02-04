@@ -22,12 +22,12 @@ export interface BoardColumn {
   order: number;
 }
 export interface CreateBoardDto {
-  name: string;
+  title: string;
   description?: string;
   memberIds?: string[];
 }
 export interface UpdateBoardDto {
-  name?: string;
+  title?: string;
   description?: string;
   memberIds?: string[];
 }

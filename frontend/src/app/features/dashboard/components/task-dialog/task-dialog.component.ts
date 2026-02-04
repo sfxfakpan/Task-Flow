@@ -19,6 +19,7 @@ import {
   TaskStatus,
   TaskPriority,
 } from '../../../../core/models/task.model';
+import { AuthService } from 'frontend/src/app/core/services/auth.service';
 
 @Component({
   selector: 'app-task-dialog',
@@ -44,7 +45,7 @@ export class TaskDialogComponent implements OnInit {
   isDeleting = signal(false);
   isEditMode = signal(false);
   deleteConfirm = signal(false);
-
+  currentUserId = signal<string>('');
 
   TaskPriority = TaskPriority;
   TaskStatus = TaskStatus;
@@ -73,6 +74,7 @@ export class TaskDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private taskService: TaskService,
+    private authService: AuthService
   ) {
     this.taskForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(200)]],
@@ -80,10 +82,20 @@ export class TaskDialogComponent implements OnInit {
       status: [TaskStatus.TODO, Validators.required],
       priority: [TaskPriority.MEDIUM, Validators.required],
       dueDate: [''],
+      assigneeId: [''],
     });
   }
 
   ngOnInit(): void {
+
+    const currentUser = this.authService['currentUserSubject'].value;
+    if (currentUser?.id) {
+      this.currentUserId.set(currentUser.id);
+
+      if (!this.taskToEdit && !this.task) {
+        this.taskForm.patchValue({ assigneeId: currentUser.id });
+      }
+    }
 
     const activeTask = this.taskToEdit || this.task;
 
@@ -95,11 +107,10 @@ export class TaskDialogComponent implements OnInit {
         description: activeTask.description || '',
         status: activeTask.status,
         priority: activeTask.priority,
-
+        assigneeId: activeTask.assigneeId || currentUser?.id,
         dueDate: activeTask.dueDate ? new Date(activeTask.dueDate).toISOString().split('T')[0] : '',
       });
     } else {
-
       this.isEditMode.set(false);
       this.taskForm.patchValue({
         status: this.defaultStatus,
@@ -126,6 +137,7 @@ export class TaskDialogComponent implements OnInit {
         ? new Date(formValue.dueDate).toISOString()
         : undefined,
       boardId: this.boardId,
+      assigneeId: formValue.assigneeId
     };
 
 
@@ -152,7 +164,7 @@ export class TaskDialogComponent implements OnInit {
     if (!activeTask?.id) return;
 
     this.isDeleting.set(true);
-    this.taskService.deleteTask(this.task.id, this.boardId).subscribe({
+    this.taskService.deleteTask(activeTask.id, this.boardId).subscribe({
       next: () => {
         this.delete.emit(activeTask.id);
         this.isDeleting.set(false);

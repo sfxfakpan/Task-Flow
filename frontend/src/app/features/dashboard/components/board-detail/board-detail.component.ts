@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import {
@@ -20,7 +20,7 @@ import { TaskCardComponent } from '../task-card/task-card.component';
 @Component({
   selector: 'app-board-detail',
   standalone: true,
-  imports: [CommonModule, DragDropModule, TaskDialogComponent],
+  imports: [CommonModule, DragDropModule, TaskDialogComponent, RouterLink],
   templateUrl: './board-detail.component.html',
   styleUrls: ['./board-detail.component.css']
 })
@@ -63,7 +63,7 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
 
-      this.boardId = params['id']; // '3b61cd4c-beb2-476e-9776-5229798ed2a6';
+      this.boardId = params['id'];
       this.loadBoardAndTasks();
     });
   }
@@ -149,7 +149,7 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
       event.container.data[event.currentIndex] = updatedTask;
 
 
-      this.taskService.updateTask(task.id, { status: newStatus }, this.boardId)
+      this.taskService.updateTask(this.boardId, task.id, { status: newStatus })
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           error: (err) => {
@@ -168,7 +168,7 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
     const currentTasks = this.columns[task.status];
     this.columns[task.status] = currentTasks.filter(t => t.id !== task.id);
 
-    this.taskService.deleteTask(task.id, this.boardId).subscribe({
+    this.taskService.deleteTask(this.boardId, task.id).subscribe({
       error: () => {
 
         this.columns[task.status] = currentTasks;
@@ -199,11 +199,10 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
 
     if (taskToEdit) {
 
-      this.taskService.updateTask(taskToEdit.id, taskData, this.boardId)
+      this.taskService.updateTask(this.boardId, taskToEdit.id, taskData)
         .pipe(finalize(() => this.isCreatingTask.set(false)))
         .subscribe({
           next: (updated) => {
-
             this.loadTasks();
             this.onCloseTaskDialog();
           },

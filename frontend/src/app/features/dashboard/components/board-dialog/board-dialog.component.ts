@@ -34,7 +34,7 @@ export class BoardDialogComponent implements OnInit {
 
   constructor(private fb: FormBuilder) {
     this.boardForm = this.fb.group({
-      name: ['', [Validators.required, Validators.maxLength(100)]],
+      title: ['', [Validators.required, Validators.maxLength(100)]],
       description: ['', [Validators.maxLength(500)]],
     });
   }
@@ -43,7 +43,7 @@ export class BoardDialogComponent implements OnInit {
     if (this.boardData) {
       this.isEditMode.set(true);
       this.boardForm.patchValue({
-        name: this.boardData.name,
+        title: this.boardData.title,
         description: this.boardData.description,
       });
     }
