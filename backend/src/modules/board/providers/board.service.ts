@@ -9,6 +9,7 @@ import { Repository, FindOptionsWhere } from 'typeorm';
 import { CreateBoardDto } from '../dtos/create-board.dto';
 import { UpdateBoardDto } from '../dtos/update-board.dto';
 import { Board } from '../entities/board.entity';
+import { DatabaseError, DatabaseErrorCode } from '../../../common/types/database-error.types';
 
 
 @Injectable()
@@ -20,14 +21,14 @@ export class BoardsService {
 
   async findAll(userId: number | string): Promise<Board[]> {
     return this.boardRepository.find({
-      where: { userId: userId as any } as FindOptionsWhere<Board>,
+      where: { userId: String(userId) } as FindOptionsWhere<Board>,
       order: { createdAt: 'DESC' },
     });
   }
 
   async findOne(id: string, userId: number | string): Promise<Board> {
     const board = await this.boardRepository.findOne({
-      where: { id, userId: userId as any } as FindOptionsWhere<Board>,
+      where: { id, userId: String(userId) } as FindOptionsWhere<Board>,
       relations: ['tasks'],
     });
 
@@ -40,16 +41,15 @@ export class BoardsService {
 
   async create(createBoardDto: CreateBoardDto, userId: number | string): Promise<Board> {
     try {
-      // Ensure userId is properly typed
-      const boardData = {
+      const board = this.boardRepository.create({
         ...createBoardDto,
-        userId: userId as any, // TypeORM will handle the conversion
-      };
+        userId: String(userId),
+      });
 
-      const board = this.boardRepository.create(boardData);
       return await this.boardRepository.save(board);
     } catch (error) {
-      if (error.code === '23505') {
+      const dbError = error as DatabaseError;
+      if (dbError.code === DatabaseErrorCode.UNIQUE_VIOLATION) {
         throw new BadRequestException('A board with this title already exists');
       }
       throw error;
@@ -74,7 +74,7 @@ export class BoardsService {
 
   async restore(id: string, userId: number | string): Promise<Board> {
     const board = await this.boardRepository.findOne({
-      where: { id, userId: userId as any } as FindOptionsWhere<Board>,
+      where: { id, userId: String(userId) } as FindOptionsWhere<Board>,
       withDeleted: true,
     });
 

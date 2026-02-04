@@ -11,6 +11,7 @@ import { CreateTaskDto } from './dtos/create-task.dto';
 import { UpdateTaskDto } from './dtos/update-task.dto';
 import { Task } from './entities/task.entity';
 import { TaskStatus } from './enum/task-status.enum';
+import { DatabaseError, DatabaseErrorCode } from '../../common/types/database-error.types';
 
 @Injectable()
 export class TasksService {
@@ -36,7 +37,8 @@ export class TasksService {
         },
       });
     } catch (error) {
-      if (error.code === '22P02') {
+      const dbError = error as DatabaseError;
+      if (dbError.code === DatabaseErrorCode.INVALID_INPUT_VALUE) {
         throw new InternalServerErrorException(
           'Database contains invalid task status values. Valid values are: TODO, IN_PROGRESS, DONE',
         );
@@ -100,7 +102,8 @@ export class TasksService {
 
       return await this.taskRepository.save(task);
     } catch (error) {
-      if (error.code === '23503') {
+      const dbError = error as DatabaseError;
+      if (dbError.code === DatabaseErrorCode.FOREIGN_KEY_VIOLATION) {
         throw new BadRequestException('Invalid boardId or assigneeId');
       }
       throw error;
@@ -169,7 +172,8 @@ export class TasksService {
         return task;
       });
     } catch (error) {
-      if (error.code === '22P02') {
+      const dbError = error as DatabaseError;
+      if (dbError.code === DatabaseErrorCode.INVALID_INPUT_VALUE) {
         throw new InternalServerErrorException(
           'Database contains invalid task status values. Valid values are: TODO, IN_PROGRESS, DONE. Please check your database for corrupted records.',
         );
