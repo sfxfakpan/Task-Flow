@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -6,7 +6,6 @@ import { takeUntil, finalize } from 'rxjs/operators';
 import {
   CdkDragDrop,
   moveItemInArray,
-  transferArrayItem,
   DragDropModule
 } from '@angular/cdk/drag-drop';
 
@@ -15,7 +14,6 @@ import { TaskService } from '../../../../core/services/task.service';
 import { Board } from '../../../../core/models/board.model';
 import { Task, TaskStatus } from '../../../../core/models/task.model';
 import { TaskDialogComponent } from '../task-dialog/task-dialog.component';
-import { TaskCardComponent } from '../task-card/task-card.component';
 
 @Component({
   selector: 'app-board-detail',
@@ -26,14 +24,14 @@ import { TaskCardComponent } from '../task-card/task-card.component';
 })
 export class BoardDetailComponent implements OnInit, OnDestroy {
   board: Board | null = null;
-  tasks: Task[] = [];
+  tasks= signal<Task[]>([]);
 
 
-  columns: Record<TaskStatus, Task[]> = {
+  columns = signal<Record<TaskStatus, Task[]>>({
     [TaskStatus.TODO]: [],
     [TaskStatus.IN_PROGRESS]: [],
     [TaskStatus.DONE]: []
-  };
+  });
 
   isLoading = signal(true);
   error = signal<string | null>(null);
@@ -57,7 +55,6 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
     private boardService: BoardService,
     private taskService: TaskService,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -99,63 +96,62 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (tasks) => {
-
-          this.tasks = Array.isArray(tasks) ? tasks : [];
+          this.tasks.set(Array.isArray(tasks) ? tasks : []);
           this.groupTasksByStatus();
         },
         error: (err) => {
-          console.error('Task Load Error:', err);
           this.error.set('Failed to load tasks');
         }
       });
   }
 
   private groupTasksByStatus(): void {
-
-    this.columns = {
+    const grouped: Record<TaskStatus, Task[]> = {
       [TaskStatus.TODO]: [],
       [TaskStatus.IN_PROGRESS]: [],
       [TaskStatus.DONE]: []
     };
 
-
-    this.tasks.forEach(task => {
-      if (this.columns[task.status]) {
-        this.columns[task.status].push(task);
-      }
+    const tasks = this.tasks();
+    tasks.forEach((task: Task) => {
+      const status = task.status as TaskStatus;
+      if (grouped[status]) grouped[status].push(task);
     });
+
+    this.columns.set(grouped);
   }
 
 
   drop(event: CdkDragDrop<Task[]>) {
     if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      // Reorder within same status immutably
+      const status = event.container.id as TaskStatus;
+      const current = [...(this.columns()[status] || [])];
+      moveItemInArray(current, event.previousIndex, event.currentIndex);
+      this.columns.update(cols => ({ ...cols, [status]: current }));
     } else {
-
-      const task = event.previousContainer.data[event.previousIndex];
+      const prevStatus = event.previousContainer.id as TaskStatus;
       const newStatus = event.container.id as TaskStatus;
 
+      const prevArray = [...(this.columns()[prevStatus] || [])];
+      const moved = prevArray.splice(event.previousIndex, 1)[0];
+      const newArray = [...(this.columns()[newStatus] || [])];
+      const updatedTask = { ...moved, status: newStatus };
+      newArray.splice(event.currentIndex, 0, updatedTask);
 
-      transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex,
-      );
+      this.columns.set({
+        ...this.columns(),
+        [prevStatus]: prevArray,
+        [newStatus]: newArray,
+      });
 
-
-      const updatedTask = { ...task, status: newStatus };
-
-      event.container.data[event.currentIndex] = updatedTask;
-
-
-      this.taskService.updateTask(this.boardId, task.id, { status: newStatus })
+      this.taskService.updateTask(this.boardId, moved.id, { status: newStatus })
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           error: (err) => {
-
             console.error('Failed to update status', err);
-
+            // revert on failure
+            this.groupTasksByStatus();
           }
         });
     }
@@ -164,14 +160,14 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
   deleteTask(task: Task) {
     if (!confirm('Are you sure you want to delete this task?')) return;
 
-
-    const currentTasks = this.columns[task.status];
-    this.columns[task.status] = currentTasks.filter(t => t.id !== task.id);
+    const status = task.status as TaskStatus;
+    const current = [...(this.columns()[status] || [])];
+    const newArray = current.filter(t => t.id !== task.id);
+    this.columns.update(cols => ({ ...cols, [status]: newArray }));
 
     this.taskService.deleteTask(this.boardId, task.id).subscribe({
       error: () => {
-
-        this.columns[task.status] = currentTasks;
+        this.columns.update(cols => ({ ...cols, [status]: current }));
         alert('Failed to delete task');
       }
     });
@@ -203,7 +199,8 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
         .pipe(finalize(() => this.isCreatingTask.set(false)))
         .subscribe({
           next: (updated) => {
-            this.loadTasks();
+            this.tasks.update(list => list.map(t => t.id === updated.id ? updated : t));
+            this.groupTasksByStatus();
             this.onCloseTaskDialog();
           },
           error: () => this.error.set('Failed to update task')
@@ -215,7 +212,7 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
         .pipe(finalize(() => this.isCreatingTask.set(false)))
         .subscribe({
           next: (newTask) => {
-            this.tasks.push(newTask);
+            this.tasks.update(tasks => [...tasks, newTask]);
             this.groupTasksByStatus();
             this.onCloseTaskDialog();
           },
@@ -226,11 +223,11 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
 
 
   getTaskCountForStatus(status: TaskStatus): number {
-    return this.columns[status]?.length || 0;
+    return this.columns()[status]?.length || 0;
   }
 
   getTasksForStatus(status: TaskStatus): Task[] {
-    return this.columns[status] || [];
+    return this.columns()[status] || [];
   }
 
   onAddTask(status: TaskStatus): void {
@@ -239,4 +236,13 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
   }
 
   onTaskClick(task: Task): void { }
+
+  truncateDescription(
+    description: string | undefined,
+    maxLength: number = 100,
+  ): string {
+    if (!description) return '';
+    if (description.length <= maxLength) return description;
+    return description.substring(0, maxLength) + '...';
+  }
 }

@@ -20,7 +20,6 @@ export class BoardCardComponent {
 
   get taskCount(): number {
     if (this.board) {
-      console.log(this.board);
       if ('tasks' in this.board && Array.isArray(this.board.tasks)) {
         return this.board.tasks.length || 0;
       }
