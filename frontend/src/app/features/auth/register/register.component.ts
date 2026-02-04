@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 import { Router } from '@angular/router';
 import {
@@ -20,6 +20,9 @@ import { CommonModule } from '@angular/common';
 export class RegisterComponent {
   activeTab: 'login' | 'register' = 'register';
   registerForm;
+  submitted = signal(false);
+  generalError = signal<string>('');
+  apiErrors = signal<{ [key: string]: string }>({});
 
   constructor(
     private auth: AuthService,
@@ -31,7 +34,7 @@ export class RegisterComponent {
         firstName: ['', [Validators.required, Validators.minLength(2)]],
         lastName: ['', [Validators.required, Validators.minLength(2)]],
         email: ['', [Validators.required, Validators.email]],
-        password: ['', [Validators.required, Validators.minLength(8)]],
+        password: ['', [Validators.required, Validators.minLength(6)]],
         confirmPassword: ['', [Validators.required]],
       },
       { validators: this.passwordMatchValidator },
@@ -57,6 +60,9 @@ export class RegisterComponent {
   }
 
   getErrorMessage(fieldName: string): string {
+    const apiError = this.apiErrors()[fieldName];
+    if (apiError) return apiError;
+
     const control = this.registerForm.get(fieldName);
     if (!control || !control.errors || !control.touched) return '';
 
@@ -72,6 +78,10 @@ export class RegisterComponent {
   submit() {
     if (this.registerForm.invalid) return;
 
+    this.submitted.set(true);
+    this.generalError.set('');
+    this.apiErrors.set({});
+
     const { firstName, lastName, email, password } = this.registerForm.value;
     this.auth
       .register({
@@ -81,10 +91,40 @@ export class RegisterComponent {
         password: password || '',
       })
       .subscribe({
-        next: () => this.router.navigate(['/login']),
+        next: () => this.router.navigate(['/dashboard']),
         error: (err) => {
-          this.getErrorMessage =
-            err?.error?.message || 'Something went wrong. Please try again.';
+          this.submitted.set(false);
+          const payload = err?.error ?? null;
+
+          // Handle validation errors (400 Bad Request with message array)
+          if (payload?.statusCode === 400 && Array.isArray(payload?.message)) {
+            const errorMap: { [key: string]: string } = {};
+            const messages: string[] = payload.message;
+
+            messages.forEach((msg: string) => {
+              if (msg.includes('firstName')) {
+                errorMap['firstName'] = msg;
+              } else if (msg.includes('lastName')) {
+                errorMap['lastName'] = msg;
+              } else if (msg.includes('email')) {
+                errorMap['email'] = msg;
+              } else if (msg.includes('password')) {
+                errorMap['password'] = msg;
+              } else {
+                this.generalError.set(msg);
+              }
+            });
+
+            this.apiErrors.set(errorMap);
+          }
+          else if (payload?.statusCode === 409) {
+            this.generalError.set(payload?.message || 'Email already exists');
+          }
+          else if (payload?.message) {
+            this.generalError.set(payload.message);
+          } else {
+            this.generalError.set('Registration failed. Please try again.');
+          }
         },
       });
   }
