@@ -8,15 +8,16 @@ import {
   Delete,
   UseGuards,
   Req,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OwnershipGuard } from '../auth/guards/ownership.guard';
+import { AuthenticatedRequest } from '../../common/interfaces/authenticated-request.interface';
 import { CreateBoardDto } from './dtos/create-board.dto';
 import { UpdateBoardDto } from './dtos/update-board.dto';
 import { Board } from './entities/board.entity';
 import { BoardsService } from './providers/board.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { OwnershipGuard } from '../auth/guards/ownership.guard';
 
 
 @ApiTags('Boards')
@@ -29,8 +30,11 @@ export class BoardsController {
   @Get()
   @ApiOperation({ summary: 'Get all boards for current user' })
   @ApiResponse({ status: 200, description: 'Boards retrieved successfully', type: [Board] })
-  async findAll(@Req() request): Promise<Board[]> {
-    const userId = request.user.id;
+  async findAll(@Req() request: AuthenticatedRequest): Promise<Board[]> {
+    const userId = request.user?.userId;
+    if (!userId) {
+      throw new BadRequestException('User ID not found in token');
+    }
     return this.boardsService.findAll(userId);
   }
 
@@ -40,8 +44,11 @@ export class BoardsController {
   @ApiResponse({ status: 200, description: 'Board retrieved successfully', type: Board })
   @ApiResponse({ status: 404, description: 'Board not found' })
   @ApiResponse({ status: 403, description: 'Forbidden - not owner' })
-  async findOne(@Param('id') id: string, @Req() request): Promise<Board> {
-    const userId = request.user.id;
+  async findOne(@Param('id') id: string, @Req() request: AuthenticatedRequest): Promise<Board> {
+    const userId = request.user?.userId;
+    if (!userId) {
+      throw new BadRequestException('User ID not found in token');
+    }
     return this.boardsService.findOne(id, userId);
   }
 
@@ -51,9 +58,12 @@ export class BoardsController {
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   async create(
     @Body() createBoardDto: CreateBoardDto,
-    @Req() request,
+    @Req() request: AuthenticatedRequest,
   ): Promise<Board> {
-    const userId = request.user.id;
+    const userId = request.user?.userId;
+    if (!userId) {
+      throw new BadRequestException('User ID not found in token');
+    }
     return this.boardsService.create(createBoardDto, userId);
   }
 
@@ -66,9 +76,12 @@ export class BoardsController {
   async update(
     @Param('id') id: string,
     @Body() updateBoardDto: UpdateBoardDto,
-    @Req() request,
+    @Req() request: AuthenticatedRequest,
   ): Promise<Board> {
-    const userId = request.user.id;
+    const userId = request.user?.userId;
+    if (!userId) {
+      throw new BadRequestException('User ID not found in token');
+    }
     return this.boardsService.update(id, updateBoardDto, userId);
   }
 
@@ -78,8 +91,11 @@ export class BoardsController {
   @ApiResponse({ status: 200, description: 'Board deleted successfully' })
   @ApiResponse({ status: 404, description: 'Board not found' })
   @ApiResponse({ status: 403, description: 'Forbidden - not owner' })
-  async remove(@Param('id') id: string, @Req() request): Promise<void> {
-    const userId = request.user.id;
+  async remove(@Param('id') id: string, @Req() request: AuthenticatedRequest): Promise<void> {
+    const userId = request.user?.userId;
+    if (!userId) {
+      throw new BadRequestException('User ID not found in token');
+    }
     return this.boardsService.remove(id, userId);
   }
 }
