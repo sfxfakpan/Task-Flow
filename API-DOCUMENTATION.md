@@ -221,7 +221,7 @@ Content-Type: application/json
 **Request Body:**
 ```json
 {
-  "name": "New Project Board",
+  "title": "New Project Board",
   "description": "Description of the board"
 }
 ```
@@ -230,7 +230,7 @@ Content-Type: application/json
 ```json
 {
   "id": "uuid",
-  "name": "New Project Board",
+  "title": "New Project Board",
   "description": "Description of the board",
   "userId": "uuid",
   "createdAt": "2024-01-15T10:00:00Z",

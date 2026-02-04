@@ -8,50 +8,64 @@ import { environment } from '../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class TaskService {
   private readonly apiUrl = environment.apiUrl;
+  private readonly endpoints = environment.endpoints.tasks;
 
   constructor(private http: HttpClient) { }
 
+
   getTasks(boardId: string): Observable<Task[]> {
+    const url = `${this.apiUrl}${this.endpoints.list.replace(':boardId', boardId)}`;
     return this.http
-      .get<Task[]>(`${this.apiUrl}/boards/${boardId}/tasks`)
+      .get<Task[]>(url)
       .pipe(catchError(this.handleError));
   }
 
-  getTask(taskId: string, boardId: string): Observable<Task> {
+  getTask(boardId: string, taskId: string): Observable<Task> {
+    let url = `${this.apiUrl}${this.endpoints.get.replace(':boardId', boardId)}`;
+    url = url.replace(':taskId', taskId);
     return this.http
-      .get<Task>(`${this.apiUrl}/boards/${boardId}/tasks/${taskId}`)
+      .get<Task>(url)
       .pipe(catchError(this.handleError));
   }
+
 
   createTask(boardId: string, data: Partial<Task>): Observable<Task> {
+    const url = `${this.apiUrl}${this.endpoints.create.replace(':boardId', boardId)}`;
     return this.http
-      .post<Task>(`${this.apiUrl}/boards/${boardId}/tasks`, data)
+      .post<Task>(url, data)
       .pipe(catchError(this.handleError));
   }
 
-  updateTask(taskId: string, data: Partial<Task>, boardId: string): Observable<Task> {
+  updateTask(boardId: string, taskId: string, data: Partial<Task>): Observable<Task> {
+    let url = `${this.apiUrl}${this.endpoints.update.replace(':boardId', boardId)}`;
+    url = url.replace(':taskId', taskId);
     return this.http
-      .patch<Task>(`${this.apiUrl}/boards/${boardId}/tasks/${taskId}`, data)
+      .patch<Task>(url, data)
       .pipe(catchError(this.handleError));
   }
 
-  deleteTask(taskId: string, boardId: string): Observable<void> {
+  deleteTask(boardId: string, taskId: string): Observable<void> {
+    let url = `${this.apiUrl}${this.endpoints.delete.replace(':boardId', boardId)}`;
+    url = url.replace(':taskId', taskId);
     return this.http
-      .delete<void>(`${this.apiUrl}/boards/${boardId}/tasks/${taskId}`)
+      .delete<void>(url)
       .pipe(catchError(this.handleError));
   }
 
+  /**
+   * Update task position (for drag-drop reordering)
+   */
   updateTaskPosition(
+    boardId: string,
     taskId: string,
-    status: TaskStatus,
     position: number,
-    boardId: string
+    status?: TaskStatus,
   ): Observable<Task> {
+    let url = `${this.apiUrl}${this.endpoints.updatePosition.replace(':boardId', boardId)}`;
+    url = url.replace(':taskId', taskId);
+    const body = { position, ...(status && { status }) };
     return this.http
-      .patch<Task>(`${this.apiUrl}/boards/${boardId}/tasks/${taskId}/position`, {
-        status,
-        position,
-      })
+      .patch<Task>(url, body)
       .pipe(catchError(this.handleError));
   }
 
@@ -62,3 +76,4 @@ export class TaskService {
     }));
   }
 }
+
