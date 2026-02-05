@@ -14,17 +14,24 @@ import { TaskService } from '../../../../core/services/task.service';
 import { Board } from '../../../../core/models/board.model';
 import { Task, TaskStatus } from '../../../../core/models/task.model';
 import { TaskDialogComponent } from '../task-dialog/task-dialog.component';
+import { ConfirmDialogComponent } from 'frontend/src/app/shared/components/confirm-dialog/confirm-dialog.component';
+
 
 @Component({
   selector: 'app-board-detail',
   standalone: true,
-  imports: [CommonModule, DragDropModule, TaskDialogComponent, RouterLink],
+  imports: [CommonModule, DragDropModule, TaskDialogComponent, RouterLink, ConfirmDialogComponent],
   templateUrl: './board-detail.component.html',
   styleUrls: ['./board-detail.component.css']
 })
 export class BoardDetailComponent implements OnInit, OnDestroy {
   board: Board | null = null;
   tasks = signal<Task[]>([]);
+  taskToDelete = signal<Task | null>(null);
+
+  initiateDelete(task: Task) {
+    this.taskToDelete.set(task);
+  }
 
   columns = signal<Record<TaskStatus, Task[]>>({
     [TaskStatus.TODO]: [],
@@ -69,6 +76,26 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  confirmDelete() {
+    const task = this.taskToDelete();
+    const status = task?.status as TaskStatus;
+    const current = [...(this.columns()[status] || [])];
+    const newArray = current.filter(t => t.id !== task?.id);
+    this.columns.update(cols => ({ ...cols, [status]: newArray }));
+
+    this.taskService.deleteTask(this.boardId, task?.id ?? '').subscribe({
+      error: () => {
+        this.columns.update(cols => ({ ...cols, [status]: current }));
+        alert('Failed to delete task');
+      }
+    });
+
+    this.taskToDelete.set(null);
+  }
+  cancelDelete() {
+    this.taskToDelete.set(null);
   }
 
   private loadBoardAndTasks(): void {
@@ -138,15 +165,9 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
 
       const prevIndex = this.STATUS_ORDER.indexOf(prevStatus);
       const newIndex = this.STATUS_ORDER.indexOf(newStatus);
-
-
-
-
       if (Math.abs(newIndex - prevIndex) > 1) {
         return;
       }
-
-
       const prevArray = [...(this.columns()[prevStatus] || [])];
       const moved = prevArray.splice(event.previousIndex, 1)[0];
       const newArray = [...(this.columns()[newStatus] || [])];
@@ -172,21 +193,6 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  deleteTask(task: Task) {
-    if (!confirm('Are you sure you want to delete this task?')) return;
-
-    const status = task.status as TaskStatus;
-    const current = [...(this.columns()[status] || [])];
-    const newArray = current.filter(t => t.id !== task.id);
-    this.columns.update(cols => ({ ...cols, [status]: newArray }));
-
-    this.taskService.deleteTask(this.boardId, task.id).subscribe({
-      error: () => {
-        this.columns.update(cols => ({ ...cols, [status]: current }));
-        alert('Failed to delete task');
-      }
-    });
-  }
 
   openEditTask(task: Task) {
     this.editingTask.set(task);

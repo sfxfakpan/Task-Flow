@@ -149,38 +149,6 @@ export class TaskDialogComponent implements OnInit {
     this.close.emit();
   }
 
-
-
-  onDeleteClick(): void {
-    this.deleteConfirm.set(true);
-  }
-
-  onDeleteCancel(): void {
-    this.deleteConfirm.set(false);
-  }
-
-  onDeleteConfirm(): void {
-    const activeTask = this.taskToEdit || this.task;
-    if (!activeTask?.id) return;
-
-    this.isDeleting.set(true);
-    this.taskService.deleteTask(this.boardId, activeTask.id).subscribe({
-      next: () => {
-        this.delete.emit(activeTask.id);
-        this.isDeleting.set(false);
-        this.deleteConfirm.set(false);
-        this.onClose();
-      },
-      error: (err) => {
-        console.error('Error deleting task:', err);
-        this.isDeleting.set(false);
-
-      },
-    });
-  }
-
-
-
   get titleError(): string {
     const control = this.taskForm.get('title');
     if (control?.hasError('required')) return 'Task title is required';

@@ -96,7 +96,7 @@ export class RegisterComponent {
           this.submitted.set(false);
           const payload = err?.error ?? null;
 
-          // Handle validation errors (400 Bad Request with message array)
+
           if (payload?.statusCode === 400 && Array.isArray(payload?.message)) {
             const errorMap: { [key: string]: string } = {};
             const messages: string[] = payload.message;
