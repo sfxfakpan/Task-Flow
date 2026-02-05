@@ -33,3 +33,31 @@
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
 }
+
+/* The box that appears in the empty space where you are about to drop */
+.custom-placeholder {
+  background: rgba(0, 0, 0, 0.05);
+  border: 2px dashed #cbd5e1;
+  border-radius: 8px;
+  min-height: 80px;
+  margin-bottom: 12px;
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* While dragging, slightly rotate the card */
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  opacity: 0.9;
+  transform: rotate(2deg);
+}
+
+/* Animations */
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-dragging .app-task-card:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}

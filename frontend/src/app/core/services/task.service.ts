@@ -10,7 +10,7 @@ export class TaskService {
   private readonly apiUrl = environment.apiUrl;
   private readonly endpoints = environment.endpoints.tasks;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
 
   getTasks(boardId: string): Observable<Task[]> {

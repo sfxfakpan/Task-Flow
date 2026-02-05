@@ -72,6 +72,7 @@
           [board]="board"
           (edit)="openEditDialog($event)"
           (delete)="initiateDelete($event)"
+          (cardClick)="openBoardDetail($event)"
         >
         </app-board-card>
         <app-confirm-dialog
@@ -79,7 +80,7 @@
           title="Delete Board?"
           [message]="
             'Are you sure you want to delete \'' +
-            boardToDelete()?.name +
+            boardToDelete()?.title +
             '\'? All tasks inside will be permanently removed.'
           "
           confirmText="Delete Board"

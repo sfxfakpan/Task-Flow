@@ -18,7 +18,14 @@ export class BoardCardComponent {
 
   menuOpen = signal(false);
 
-
+  get taskCount(): number {
+    if (this.board) {
+      if ('tasks' in this.board && Array.isArray(this.board.tasks)) {
+        return this.board.tasks.length || 0;
+      }
+    }
+    return this.board?.taskCount || 0;
+  }
   toggleMenu(event: Event) {
     event.stopPropagation();
     this.menuOpen.update(value => !value);

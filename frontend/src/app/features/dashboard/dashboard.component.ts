@@ -48,7 +48,7 @@ export class DashboardComponent implements OnInit {
   constructor(
     private boardService: BoardService,
     private router: Router,
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadBoards();
@@ -78,7 +78,11 @@ export class DashboardComponent implements OnInit {
     this.showDialog.set(true);
   }
 
-  handleSave(formData: { name: string; description: string }) {
+  openBoardDetail(board: Board) {
+    this.router.navigate(['/board-detail', board.id]);
+  }
+
+  handleSave(formData: { title: string; description: string }) {
     const editingBoard = this.editingBoard();
     if (editingBoard !== null) {
       this.boardService.updateBoard(editingBoard.id, formData).subscribe({

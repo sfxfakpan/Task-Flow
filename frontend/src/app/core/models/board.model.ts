@@ -3,13 +3,14 @@ import { Task } from './task.model';
 
 export interface Board {
   id: string;
-  name: string;
+  title: string;
   description?: string;
   owner?: User;
   members?: User[];
   createdAt: Date;
   updatedAt?: Date;
   taskCount?: number;
+  tasks?: Task[];
 }
 export interface BoardDetail extends Board {
   columns: BoardColumn[];
@@ -21,12 +22,12 @@ export interface BoardColumn {
   order: number;
 }
 export interface CreateBoardDto {
-  name: string;
+  title: string;
   description?: string;
   memberIds?: string[];
 }
 export interface UpdateBoardDto {
-  name?: string;
+  title?: string;
   description?: string;
   memberIds?: string[];
 }
