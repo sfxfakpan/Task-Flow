@@ -24,8 +24,7 @@ import { TaskDialogComponent } from '../task-dialog/task-dialog.component';
 })
 export class BoardDetailComponent implements OnInit, OnDestroy {
   board: Board | null = null;
-  tasks= signal<Task[]>([]);
-
+  tasks = signal<Task[]>([]);
 
   columns = signal<Record<TaskStatus, Task[]>>({
     [TaskStatus.TODO]: [],
@@ -48,6 +47,9 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
     [TaskStatus.DONE]: 'Done',
   };
 
+
+  readonly STATUS_ORDER = [TaskStatus.TODO, TaskStatus.IN_PROGRESS, TaskStatus.DONE];
+
   private destroy$ = new Subject<void>();
   private boardId: string = '';
 
@@ -59,7 +61,6 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-
       this.boardId = params['id'];
       this.loadBoardAndTasks();
     });
@@ -124,18 +125,32 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
 
   drop(event: CdkDragDrop<Task[]>) {
     if (event.previousContainer === event.container) {
-      // Reorder within same status immutably
+
       const status = event.container.id as TaskStatus;
       const current = [...(this.columns()[status] || [])];
       moveItemInArray(current, event.previousIndex, event.currentIndex);
       this.columns.update(cols => ({ ...cols, [status]: current }));
     } else {
+
       const prevStatus = event.previousContainer.id as TaskStatus;
       const newStatus = event.container.id as TaskStatus;
+
+
+      const prevIndex = this.STATUS_ORDER.indexOf(prevStatus);
+      const newIndex = this.STATUS_ORDER.indexOf(newStatus);
+
+
+
+
+      if (Math.abs(newIndex - prevIndex) > 1) {
+        return;
+      }
+
 
       const prevArray = [...(this.columns()[prevStatus] || [])];
       const moved = prevArray.splice(event.previousIndex, 1)[0];
       const newArray = [...(this.columns()[newStatus] || [])];
+
       const updatedTask = { ...moved, status: newStatus };
       newArray.splice(event.currentIndex, 0, updatedTask);
 
@@ -150,7 +165,7 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
         .subscribe({
           error: (err) => {
             console.error('Failed to update status', err);
-            // revert on failure
+
             this.groupTasksByStatus();
           }
         });
@@ -179,13 +194,11 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
     this.showTaskDialog.set(true);
   }
 
-
   onCloseTaskDialog(): void {
     this.showTaskDialog.set(false);
     this.isCreatingTask.set(false);
     this.editingTask.set(null);
   }
-
 
   onSaveTask(taskData: Partial<Task>): void {
     if (!this.boardId) return;
@@ -194,7 +207,6 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
     const taskToEdit = this.editingTask();
 
     if (taskToEdit) {
-
       this.taskService.updateTask(this.boardId, taskToEdit.id, taskData)
         .pipe(finalize(() => this.isCreatingTask.set(false)))
         .subscribe({
@@ -206,7 +218,6 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
           error: () => this.error.set('Failed to update task')
         });
     } else {
-
       const createTaskDto = { ...taskData, boardId: this.boardId };
       this.taskService.createTask(this.boardId, createTaskDto)
         .pipe(finalize(() => this.isCreatingTask.set(false)))
@@ -220,7 +231,6 @@ export class BoardDetailComponent implements OnInit, OnDestroy {
         });
     }
   }
-
 
   getTaskCountForStatus(status: TaskStatus): number {
     return this.columns()[status]?.length || 0;
