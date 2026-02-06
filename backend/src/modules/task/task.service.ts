@@ -80,6 +80,7 @@ export class TasksService {
 
   /**
    * Create a new task with auto-calculated position
+   * IMPORTANT: Tasks are ALWAYS created in TODO status, regardless of input
    */
   async create(boardId: string, createTaskDto: CreateTaskDto): Promise<Task> {
     try {
@@ -92,12 +93,14 @@ export class TasksService {
         throw new NotFoundException('Board not found');
       }
 
-      const position = await this.calculateNextPosition(boardId, createTaskDto.status);
+      // Force status to TODO - strict workflow enforcement
+      const position = await this.calculateNextPosition(boardId, TaskStatus.TODO);
 
       const task = this.taskRepository.create({
         ...createTaskDto,
         boardId,
         position,
+        status: TaskStatus.TODO, // Always TODO, ignoring any client input
       });
 
       return await this.taskRepository.save(task);
