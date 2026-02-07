@@ -186,9 +186,6 @@ importers:
       '@types/dotenv':
         specifier: ^8.2.3
         version: 8.2.3
-      '@types/express':
-        specifier: ^5.0.6
-        version: 5.0.6
       '@types/jest':
         specifier: ^30.0.0
         version: 30.0.0

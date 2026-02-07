@@ -1,6 +1,4 @@
-<div
-  class="flex flex-col min-h-screen bg-background-light dark:bg-background-dark font-display"
->
+<div class="flex flex-col min-h-screen bg-slate-950 font-display">
   <app-navbar></app-navbar>
   <main class="flex-1 max-w-[1280px] w-full mx-auto px-6 py-8">
     <div *ngIf="isLoading()" class="flex h-[60vh] items-center justify-center">
@@ -9,31 +7,29 @@
 
     <div
       *ngIf="!isLoading() && boards().length === 0"
-      class="flex flex-col items-center justify-center py-20 px-4 bg-white/50 dark:bg-gray-800/20 rounded-2xl border border-dashed border-gray-300"
+      class="flex flex-col items-center justify-center py-20 px-4 bg-slate-900/50 rounded-2xl border border-dashed border-slate-700"
     >
       <div class="flex flex-col items-center text-center max-w-[420px]">
         <div class="relative mb-8 flex justify-center items-center">
           <div
             class="absolute inset-0 bg-primary/10 rounded-full blur-3xl opacity-50"
           ></div>
-          <span class="material-symbols-outlined text-9xl text-slate-300"
+          <span class="material-symbols-outlined text-9xl text-slate-700"
             >assignment_add</span
           >
         </div>
 
-        <h3
-          class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight"
-        >
+        <h3 class="text-2xl font-bold text-white tracking-tight">
           Start your first project
         </h3>
-        <p class="text-gray-500 text-base leading-relaxed mt-3 mb-8">
+        <p class="text-slate-400 text-base leading-relaxed mt-3 mb-8">
           No boards yet. Create your first project board to start tracking tasks
           and managing your workflow.
         </p>
 
         <button
           (click)="openCreateDialog()"
-          class="flex items-center justify-center gap-2 min-w-[200px] h-12 px-8 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-base shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5"
+          class="btn btn-primary flex items-center justify-center gap-2 min-w-[200px]"
         >
           <span class="material-symbols-outlined">add_circle</span>
           <span>Create Board</span>
@@ -46,18 +42,14 @@
         class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8"
       >
         <div>
-          <h1
-            class="text-3xl font-black text-slate-900 dark:text-white tracking-tight"
-          >
-            My Boards
-          </h1>
-          <p class="text-slate-500 mt-1">
+          <h1 class="text-h1 mb-2">My Boards</h1>
+          <p class="text-slate-400 mt-1">
             Manage your team projects and visual workflows.
           </p>
         </div>
         <button
           (click)="openCreateDialog()"
-          class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg font-bold transition-all shadow-md shadow-primary/20 shrink-0"
+          class="btn btn-primary flex items-center gap-2 shrink-0"
         >
           <span class="material-symbols-outlined text-[20px]">add</span>
           <span>New Board</span>
@@ -92,15 +84,15 @@
 
         <div
           (click)="openCreateDialog()"
-          class="group border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl hover:border-primary/50 hover:bg-white dark:hover:bg-slate-900 transition-all flex flex-col items-center justify-center p-8 cursor-pointer min-h-[280px]"
+          class="group border-2 border-dashed border-slate-700 rounded-xl hover:border-primary/50 hover:bg-slate-900 transition-all flex flex-col items-center justify-center p-8 cursor-pointer min-h-[280px]"
         >
           <div
-            class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-4"
+            class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-4"
           >
             <span class="material-symbols-outlined text-[32px]">add</span>
           </div>
-          <p class="text-slate-900 font-bold">New Board</p>
-          <p class="text-slate-500 text-xs text-center mt-2">
+          <p class="text-white font-bold">New Board</p>
+          <p class="text-slate-400 text-xs text-center mt-2">
             Start a project from scratch
           </p>
         </div>
@@ -109,7 +101,7 @@
   </main>
 
   <div
-    class="md:hidden sticky bottom-0 w-full bg-white border-t border-slate-200 flex justify-around py-3 z-40"
+    class="md:hidden sticky bottom-0 w-full bg-slate-900 border-t border-slate-800 flex justify-around py-3 z-40"
   >
     <button class="flex flex-col items-center gap-1 text-primary">
       <span class="material-symbols-outlined">dashboard</span>
