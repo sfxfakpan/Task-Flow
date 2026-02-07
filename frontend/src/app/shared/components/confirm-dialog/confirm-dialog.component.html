@@ -1,45 +1,35 @@
-<div
-  class="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center animation-fade-in"
-  (click)="cancel.emit()"
->
+<div class="modal" (click)="cancel.emit()">
   <div
     (click)="$event.stopPropagation()"
-    class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-[400px] max-w-[90vw] overflow-hidden border border-slate-200 dark:border-slate-800 animation-scale-up p-6"
+    class="modal-content w-[400px] max-w-[90vw]"
   >
-    <div class="flex items-start gap-4">
+    <div class="flex items-start gap-4 p-6">
       <div
-        class="shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-red-100 dark:bg-red-900/30 text-red-600"
+        class="shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-red-900/30 text-red-400"
       >
         <span class="material-symbols-outlined">warning</span>
       </div>
 
       <div class="flex-1">
-        <h3 class="text-lg font-bold text-slate-900 dark:text-white">
+        <h3 class="text-lg font-bold text-white">
           {{ title }}
         </h3>
-        <p
-          class="text-slate-500 dark:text-slate-400 text-sm mt-2 leading-relaxed"
-        >
+        <p class="text-slate-300 text-sm mt-2 leading-relaxed">
           {{ message }}
         </p>
       </div>
     </div>
 
-    <div class="flex justify-end gap-3 mt-8">
-      <button
-        (click)="cancel.emit()"
-        class="px-4 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-colors text-sm"
-      >
+    <div class="modal-footer">
+      <button (click)="cancel.emit()" class="btn btn-ghost">
         {{ cancelText }}
       </button>
 
       <button
         (click)="confirm.emit()"
-        class="px-4 py-2 rounded-lg text-white font-medium shadow-sm transition-all text-sm flex items-center gap-2"
-        [class.bg-red-600]="type === 'danger'"
-        [class.hover:bg-red-700]="type === 'danger'"
-        [class.bg-blue-600]="type === 'info'"
-        [class.hover:bg-blue-700]="type === 'info'"
+        class="btn"
+        [class.btn-danger]="type === 'danger'"
+        [class.btn-primary]="type === 'info'"
       >
         {{ confirmText }}
       </button>
