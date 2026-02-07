@@ -107,7 +107,7 @@
                   <span class="material-symbols-outlined text-lg">edit</span>
                 </button>
                 <button
-                  (click)="deleteTask(task)"
+                  (click)="initiateDelete(task)"
                   class="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-400 hover:text-red-500"
                 >
                   <span class="material-symbols-outlined text-lg">delete</span>
@@ -149,6 +149,20 @@
       </div>
     </div>
   </div>
+  <app-confirm-dialog
+    *ngIf="taskToDelete()"
+    title="Delete Task?"
+    [message]="
+      'Are you sure you want to delete \'' +
+      taskToDelete()?.title +
+      '\'? This action cannot be undone.'
+    "
+    confirmText="Delete Task"
+    type="danger"
+    (confirm)="confirmDelete()"
+    (cancel)="cancelDelete()"
+  >
+  </app-confirm-dialog>
 
   <app-task-dialog
     *ngIf="showTaskDialog()"

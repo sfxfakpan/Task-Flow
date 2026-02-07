@@ -1,6 +1,6 @@
 <div class="modal" (click)="onClose()">
   <div
-    class="modal-content max-w-md w-[90%] max-h-[90vh] overflow-y-auto"
+    class="bg-white rounded-lg shadow-2xl max-w-xl w-[90%] max-h-[90vh] overflow-y-auto animate-slideUp"
     (click)="$event.stopPropagation()"
   >
     <!-- Dialog Header -->
@@ -18,34 +18,6 @@
         ×
       </button>
     </div>
-
-    <!-- Delete Confirmation -->
-    @if (deleteConfirm()) {
-      <div class="p-6 bg-red-900/20 border-b border-red-700/50 text-center">
-        <p class="m-0 mb-4 text-red-300 font-medium">
-          Are you sure you want to delete this task?
-        </p>
-        <div class="flex gap-3 justify-center">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            (click)="onDeleteCancel()"
-            [disabled]="isDeleting()"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            class="btn btn-danger"
-            (click)="onDeleteConfirm()"
-            [disabled]="isDeleting()"
-          >
-            {{ isDeleting() ? 'Deleting...' : 'Delete' }}
-          </button>
-        </div>
-      </div>
-    }
-
     <!-- Form Content -->
     <form
       *ngIf="!deleteConfirm()"
@@ -129,23 +101,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Status Dropdown (Column) - Only visible in edit mode -->
-      <div class="mb-5" *ngIf="isEditMode()">
-        <label for="status" class="block font-medium text-gray-700 text-sm mb-2"
-          >Column</label
-        >
-        <select
-          id="status"
-          formControlName="status"
-          class="form-input appearance-none pr-10"
-        >
-          <option *ngFor="let status of statuses" [value]="status">
-            {{ statusLabels[status] }}
-          </option>
-        </select>
-      </div>
-
       <!-- Due Date Picker -->
       <div class="mb-6">
         <label
