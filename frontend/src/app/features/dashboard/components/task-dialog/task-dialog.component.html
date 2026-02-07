@@ -130,11 +130,9 @@
         </div>
       </div>
 
-      <!-- Status Dropdown (Column) -->
-      <div class="mb-5">
-        <label
-          for="status"
-          class="block font-medium text-slate-300 text-sm mb-2"
+      <!-- Status Dropdown (Column) - Only visible in edit mode -->
+      <div class="mb-5" *ngIf="isEditMode()">
+        <label for="status" class="block font-medium text-gray-700 text-sm mb-2"
           >Column</label
         >
         <select
